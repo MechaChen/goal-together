@@ -1,15 +1,17 @@
 from fastapi import APIRouter
-from src.api.progress_get import router as progress_router
-from src.api.todos_create import router as todos_create_router
-from src.api.todos_delete import router as todos_delete_router
-from src.api.todos_list import router as todos_list_router
-from src.api.todos_toggle import router as todos_toggle_router
-from src.api.todos_update import router as todos_update_router
+from src.api.main_goals import router as main_goals_router
+from src.api.rewards_history import router as rewards_history_router
+from src.api.sub_goals import router as sub_goals_router
+from src.api.tasks_complete import router as tasks_complete_router
+from src.api.tasks_confirm import router as tasks_confirm_router
+from src.api.tasks_draft import router as tasks_draft_router
+from src.api.wallet_get import router as wallet_get_router
 
 router = APIRouter()
-router.include_router(todos_create_router)
-router.include_router(todos_list_router)
-router.include_router(todos_update_router)
-router.include_router(todos_toggle_router)
-router.include_router(todos_delete_router)
-router.include_router(progress_router)
+router.include_router(main_goals_router)
+router.include_router(sub_goals_router)
+router.include_router(tasks_draft_router)
+router.include_router(tasks_confirm_router)
+router.include_router(tasks_complete_router)
+router.include_router(wallet_get_router)
+router.include_router(rewards_history_router)
