@@ -1,0 +1,15 @@
+node_modules/
+frontend/node_modules/
+dist/
+build/
+coverage/
+.git/
+.dockerignore
+Dockerfile*
+*.log*
+.env*
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
