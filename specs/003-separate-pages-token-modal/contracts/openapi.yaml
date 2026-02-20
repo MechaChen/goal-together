@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: Goal Together UI Navigation Split Contract Note
+  version: 1.0.0
+  description: |
+    This feature does not introduce new backend API endpoints.
+    Existing hierarchy and reward endpoints remain unchanged and are reused by
+    dedicated pages and global reward modal orchestration.
+    Contract compatibility is tracked in tests/contract/navigation-split-contract.md.
+servers:
+  - url: http://localhost:8000
+paths:
+  /main-goals:
+    get:
+      summary: Existing endpoint reused by Main Goals page
+      responses:
+        "200":
+          description: Unchanged
+  /main-goals/{mainGoalId}/sub-goals:
+    get:
+      summary: Existing endpoint reused by Sub Goals page
+      responses:
+        "200":
+          description: Unchanged
+  /sub-goals/{subGoalId}/tasks:
+    get:
+      summary: Existing endpoint reused by Tasks page
+      responses:
+        "200":
+          description: Unchanged
+  /rewards/history:
+    get:
+      summary: Existing endpoint reused by Reward History page
+      responses:
+        "200":
+          description: Unchanged
+  /tasks/{taskId}/complete:
+    post:
+      summary: Existing endpoint reused for reward modal trigger events
+      responses:
+        "200":
+          description: Unchanged

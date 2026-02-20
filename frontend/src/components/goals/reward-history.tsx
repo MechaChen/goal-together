@@ -1,4 +1,5 @@
 import type { RewardEvent } from "../../services/reward-hierarchy.types";
+import { TokenIcon } from "../rewards/token-icon";
 
 type RewardHistoryProps = {
   items: RewardEvent[];
@@ -12,9 +13,12 @@ export function RewardHistory({ items }: RewardHistoryProps) {
       <ul className="mt-2 space-y-2">
         {items.map((event) => (
           <li key={event.id} className="rounded border border-slate-200 p-2 text-sm">
-            <p className="font-medium text-slate-800">
-              {event.event_type} +{event.token_amount}
-            </p>
+            <div className="flex items-center gap-2">
+              <TokenIcon size={18} label="History token" />
+              <p className="font-medium text-slate-800">
+                {event.event_type} +{event.token_amount}
+              </p>
+            </div>
             <p className="text-xs text-slate-500">Counter: {event.rewarded_completion_counter ?? "-"}</p>
             <p className="text-xs text-slate-500">{new Date(event.created_at).toLocaleString()}</p>
           </li>

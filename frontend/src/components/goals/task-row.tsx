@@ -38,10 +38,22 @@ export function TaskRow({ task, onConfirm, onComplete, onDelete, onUpdate, compl
           </>
         ) : (
           <div className="space-y-1 text-right">
-            <button className="rounded bg-slate-900 px-2 py-1 text-xs text-white" onClick={() => void onComplete(task.id)}>
-              Complete
+            <button
+              className={`rounded px-2 py-1 text-xs text-white ${
+                task.is_completed ? "cursor-not-allowed bg-slate-300 text-slate-500" : "bg-slate-900"
+              }`}
+              disabled={task.is_completed}
+              aria-disabled={task.is_completed}
+              onClick={() => {
+                if (!task.is_completed) {
+                  void onComplete(task.id);
+                }
+              }}
+            >
+              {task.is_completed ? "Completed" : "Complete"}
             </button>
             <p className="text-[11px] text-slate-500">Confirmed tasks cannot be deleted.</p>
+            {task.is_completed ? <p className="text-[11px] text-slate-500">This task is already completed.</p> : null}
           </div>
         )}
       </div>
