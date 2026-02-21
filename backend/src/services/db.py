@@ -21,6 +21,11 @@ async def get_db() -> AsyncSession:
 
 
 async def init_db() -> None:
+    from src.models.main_goal import MainGoal  # noqa: F401
+    from src.models.reward_event import RewardEvent  # noqa: F401
+    from src.models.sub_goal import SubGoal  # noqa: F401
+    from src.models.task_item import TaskItem  # noqa: F401
+    from src.models.token_wallet import TokenWallet  # noqa: F401
     from src.models.todo_item import TodoItem  # noqa: F401
 
     async with engine.begin() as conn:

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from src.services.todo_repository import CapacityError, NotFoundError, ValidationError
+from src.services.service_errors import CapacityError, ConflictError, NotFoundError, ValidationError
 
 
 class ErrorResponse(BaseModel):
@@ -24,4 +24,8 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(NotFoundError)
     async def handle_not_found(_: Request, exc: NotFoundError) -> JSONResponse:
-        return _err("TODO_NOT_FOUND", str(exc), 404)
+        return _err("RESOURCE_NOT_FOUND", str(exc), 404)
+
+    @app.exception_handler(ConflictError)
+    async def handle_conflict(_: Request, exc: ConflictError) -> JSONResponse:
+        return _err("CONFLICT_ERROR", str(exc), 409)

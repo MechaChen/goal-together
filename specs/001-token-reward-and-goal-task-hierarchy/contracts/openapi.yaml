@@ -1,0 +1,213 @@
+openapi: 3.0.3
+info:
+  title: Goal Together Hierarchy and Rewards API
+  version: 1.0.0
+  description: API contract for main goal/sub goal/task hierarchy with token rewards.
+servers:
+  - url: http://localhost:8000
+paths:
+  /main-goals:
+    get:
+      summary: List full hierarchy tree rooted at main goals
+      responses:
+        "200":
+          description: Main goal hierarchy
+    post:
+      summary: Create main goal
+      responses:
+        "201":
+          description: Main goal created
+  /main-goals/{mainGoalId}:
+    patch:
+      summary: Update main goal fields
+      parameters:
+        - in: path
+          name: mainGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Main goal updated
+    delete:
+      summary: Delete main goal and nested children
+      parameters:
+        - in: path
+          name: mainGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Main goal deleted
+  /main-goals/{mainGoalId}/sub-goals:
+    get:
+      summary: List sub goals under main goal
+      parameters:
+        - in: path
+          name: mainGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sub goal list
+    post:
+      summary: Create sub goal under main goal
+      parameters:
+        - in: path
+          name: mainGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Sub goal created
+  /sub-goals/{subGoalId}:
+    patch:
+      summary: Update sub goal title
+      parameters:
+        - in: path
+          name: subGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sub goal updated
+    delete:
+      summary: Delete sub goal and nested tasks
+      parameters:
+        - in: path
+          name: subGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Sub goal deleted
+  /sub-goals/{subGoalId}/tasks:
+    get:
+      summary: List tasks under sub goal
+      parameters:
+        - in: path
+          name: subGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task list
+    post:
+      summary: Create draft task under sub goal
+      parameters:
+        - in: path
+          name: subGoalId
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Draft task created
+  /tasks/{taskId}/confirm:
+    post:
+      summary: Confirm draft task (becomes immutable for deletion)
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task confirmed
+  /tasks/{taskId}:
+    patch:
+      summary: Edit task (allowed only in draft)
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task updated
+        "409":
+          description: Task is confirmed and immutable for edits
+    delete:
+      summary: Delete task (allowed only in draft)
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Draft task deleted
+        "409":
+          description: Confirmed task deletion forbidden
+  /tasks/{taskId}/complete:
+    post:
+      summary: Complete task and process rewards
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Completion processed with reward summary
+        "409":
+          description: Already completed previously or task not reward-eligible
+  /wallet:
+    get:
+      summary: Get token wallet balance
+      responses:
+        "200":
+          description: Wallet summary
+  /rewards/history:
+    get:
+      summary: Get reward history
+      responses:
+        "200":
+          description: Reward event list
+components:
+  schemas:
+    Task:
+      type: object
+      required: [id, sub_goal_id, title, lifecycle_state, is_completed]
+      properties:
+        id:
+          type: string
+        sub_goal_id:
+          type: string
+        title:
+          type: string
+        lifecycle_state:
+          type: string
+          enum: [draft, confirmed]
+        is_completed:
+          type: boolean
+    RewardEvent:
+      type: object
+      required: [id, event_type, token_amount, created_at]
+      properties:
+        id:
+          type: string
+        event_type:
+          type: string
+          enum: [TASK_COMPLETE, MILESTONE_5X]
+        token_amount:
+          type: integer
+        task_id:
+          type: string
+          nullable: true
+        rewarded_completion_counter:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time

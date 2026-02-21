@@ -1,1 +1,67 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --surface-page: #ffffff;
+  --surface-card: #f1ece6;
+  --surface-subtle: #ece7e2;
+  --line-soft: #abd9e8;
+  --ink-strong: #323232;
+  --ink-soft: #8f8f8f;
+  --accent-orange: #d98326;
+  --accent-blue: #76b7cd;
+  --danger-soft: #d9aaa5;
+
+  /* Backward-compatible aliases for existing components */
+  --app-bg: var(--surface-page);
+  --panel-bg: var(--surface-card);
+  --panel-soft: var(--surface-subtle);
+  --accent-line: var(--line-soft);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: var(--surface-page);
+}
+
+body {
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--ink-strong);
+  font-family: var(--font-sans);
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
+}
+
+@keyframes rewardCoinFlip {
+  0% {
+    transform: rotateY(0deg) rotateX(0deg);
+  }
+  50% {
+    transform: rotateY(180deg) rotateX(8deg);
+  }
+  100% {
+    transform: rotateY(360deg) rotateX(0deg);
+  }
+}
+
+.reward-coin-flip {
+  transform-style: preserve-3d;
+  perspective: 960px;
+  animation: rewardCoinFlip 1s linear infinite;
+  will-change: transform;
+}

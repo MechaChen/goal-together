@@ -2,18 +2,7 @@ from typing import Sequence
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.todo_item import TodoItem
-
-
-class ValidationError(ValueError):
-    pass
-
-
-class NotFoundError(LookupError):
-    pass
-
-
-class CapacityError(RuntimeError):
-    pass
+from src.services.service_errors import CapacityError, NotFoundError, ValidationError
 
 
 def _normalize_target(main_target: str) -> str:
