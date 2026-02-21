@@ -8,7 +8,12 @@ type TaskEditorProps = {
   onCancel?: () => void;
 };
 
-export function TaskEditor({ submitLabel, initialValue = "", onSubmit, onCancel }: TaskEditorProps) {
+export function TaskEditor({
+  submitLabel,
+  initialValue = "",
+  onSubmit,
+  onCancel,
+}: TaskEditorProps) {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +33,7 @@ export function TaskEditor({ submitLabel, initialValue = "", onSubmit, onCancel 
 
   return (
     <form className="space-y-2" onSubmit={handleSubmit}>
-      <div className="flex flex-wrap overflow-hidden rounded-full border border-[#dfd6cf] bg-[var(--panel-soft)]">
+      <div className="flex flex-wrap overflow-hidden rounded-full border border-[#dfd6cf] bg-[var(--panel-soft)] bg-white">
         <input
           className="min-w-56 flex-1 bg-transparent px-5 py-3 text-base text-[var(--ink-strong)] outline-none placeholder:text-[var(--ink-soft)]"
           value={value}

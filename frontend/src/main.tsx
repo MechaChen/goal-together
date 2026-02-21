@@ -4,13 +4,15 @@ import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";
 import "@fontsource/poppins/600.css";
 import "@fontsource/poppins/700.css";
-import goalTogetherLogo from "./assets/images/goal-together-logo.png";
+import goalTogetherFavicon from "./assets/images/goal-together-favicon.png";
 
 import { App } from "./app";
 import "./index.css";
 
 function applyFavicon(href: string) {
-  const existing = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
+  const existing = document.querySelector(
+    "link[rel='icon']",
+  ) as HTMLLinkElement | null;
   if (existing) {
     existing.href = href;
     return;
@@ -22,7 +24,7 @@ function applyFavicon(href: string) {
   document.head.appendChild(link);
 }
 
-applyFavicon(goalTogetherLogo);
+applyFavicon(goalTogetherFavicon);
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
