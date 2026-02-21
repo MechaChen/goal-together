@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { Plus, X } from "lucide-react";
 
 type TaskEditorProps = {
   submitLabel: string;
@@ -27,24 +28,33 @@ export function TaskEditor({ submitLabel, initialValue = "", onSubmit, onCancel 
 
   return (
     <form className="space-y-2" onSubmit={handleSubmit}>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap overflow-hidden rounded-full border border-[#dfd6cf] bg-[var(--panel-soft)]">
         <input
-          className="flex-1 rounded border border-slate-300 px-2 py-1"
+          className="min-w-56 flex-1 bg-transparent px-5 py-3 text-base text-[var(--ink-strong)] outline-none placeholder:text-[var(--ink-soft)]"
           value={value}
           onChange={(event) => setValue(event.target.value)}
           maxLength={200}
           placeholder="Task title"
         />
-        <button type="submit" className="rounded bg-slate-900 px-3 py-1 text-sm text-white">
+        <button
+          type="submit"
+          className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-blue)] px-6 py-3 text-base font-semibold tracking-wide text-white"
+        >
+          <Plus size={18} aria-hidden />
           {submitLabel}
         </button>
         {onCancel ? (
-          <button type="button" className="rounded border border-slate-300 px-3 py-1 text-sm" onClick={onCancel}>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-full border border-[#d8cdc5] bg-[#eee7e1] px-4 py-3 text-sm font-medium text-[var(--ink-soft)]"
+            onClick={onCancel}
+          >
+            <X size={15} aria-hidden />
             Cancel
           </button>
         ) : null}
       </div>
-      {error ? <p className="text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="text-xs text-[#b95858]">{error}</p> : null}
     </form>
   );
 }

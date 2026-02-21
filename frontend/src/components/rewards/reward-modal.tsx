@@ -41,13 +41,13 @@ export function RewardModal() {
       aria-label="Reward celebration"
       data-testid="reward-modal"
     >
-      <div className="pointer-events-none w-[320px] rounded-xl border border-amber-200/80 bg-white/95 p-6 text-center shadow-2xl backdrop-blur-sm">
-        <p className="mb-2 text-sm uppercase tracking-widest text-amber-600">Reward Earned</p>
+      <div className="pointer-events-none w-[320px] rounded-[28px] border border-[#ddcfc2] bg-[var(--surface-card)]/95 p-6 text-center shadow-xl">
+        <p className="mb-2 text-sm uppercase tracking-widest text-[var(--accent-orange)]">Reward Earned</p>
         <div className="mx-auto mb-3 w-fit reward-coin-flip">
           <TokenIcon size={72} label="Reward token" />
         </div>
-        <p className="text-xl font-bold text-slate-900">+{active.token_amount} tokens</p>
-        <p className="mt-1 text-xs text-slate-500">{active.reason || "Reward granted"}</p>
+        <p className="text-xl font-bold text-[var(--ink-strong)]">+{active.token_amount} tokens</p>
+        <p className="mt-1 text-xs font-medium text-[var(--ink-soft)]">{active.reason || "Reward granted"}</p>
       </div>
     </div>
   );

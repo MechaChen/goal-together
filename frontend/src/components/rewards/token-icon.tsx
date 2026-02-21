@@ -26,17 +26,23 @@ export function TokenIcon({ size = 24, className, label = "Token icon" }: TokenI
         </linearGradient>
       </defs>
 
-      <circle cx="32" cy="32" r="28" fill="url(#coin-rim)" stroke="#7c2d12" strokeWidth="2" />
-      <circle cx="32" cy="32" r="22.5" fill="url(#coin-core)" stroke="#92400e" strokeWidth="1.75" />
+      <circle cx="32" cy="32" r="26.5" fill="url(#coin-rim)" stroke="#7c2d12" strokeWidth="2.2" />
+      <circle cx="32" cy="32" r="20.8" fill="url(#coin-core)" stroke="#92400e" strokeWidth="1.8" />
 
-      <circle cx="21" cy="22" r="3.6" fill="#fef3c7" stroke="#92400e" strokeWidth="1.1" />
-      <circle cx="32" cy="19.5" r="3.6" fill="#fef3c7" stroke="#92400e" strokeWidth="1.1" />
-      <circle cx="43" cy="22" r="3.6" fill="#fef3c7" stroke="#92400e" strokeWidth="1.1" />
-      <circle cx="24.5" cy="31.5" r="3.1" fill="#fde68a" stroke="#92400e" strokeWidth="1" />
-      <circle cx="39.5" cy="31.5" r="3.1" fill="#fde68a" stroke="#92400e" strokeWidth="1" />
+      <path
+        d="M32 10a22 22 0 1 0 0 44a22 22 0 1 0 0-44z"
+        fill="none"
+        stroke="#8b3e0d"
+        strokeWidth="1.6"
+        strokeDasharray="2.6 3.4"
+      />
 
-      <text x="32" y="45" textAnchor="middle" fontSize="13" fontWeight="700" fill="#78350f" letterSpacing="0.8">
-        GT
+      <circle cx="22" cy="19.8" r="3.3" fill="#fef3c7" stroke="#92400e" strokeWidth="1.05" />
+      <circle cx="32" cy="17.9" r="3.3" fill="#fef3c7" stroke="#92400e" strokeWidth="1.05" />
+      <circle cx="42" cy="19.8" r="3.3" fill="#fef3c7" stroke="#92400e" strokeWidth="1.05" />
+
+      <text x="32" y="43.5" textAnchor="middle" fontSize="18" fontWeight="700" fill="#78350f">
+        G
       </text>
     </svg>
   );

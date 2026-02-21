@@ -1,11 +1,18 @@
 # goal-together
 
-Simple todo app with:
+## Todos
+
+- [] coin style is not good looking, modify it
+- [] sidebar should be togglable
+- [] main page should be the last ongoing tasks list
+- [] if the subgoal is done, switch to next subgoal
+
+## Prerequisites
+
+tech stack:
 - Python FastAPI + SQLite backend
 - React + Vite + Tailwind CSS 4 frontend
 - 5-item todo limit and progress bar
-
-## Prerequisites
 
 - Python 3.12+
 - `uv`
@@ -47,3 +54,4 @@ pnpm test --run --passWithNoTests
 4. Verify 6th todo is blocked
 5. Toggle/delete todos and verify progress bar updates
 6. Verify zero state shows `0%` and `0/0`
+

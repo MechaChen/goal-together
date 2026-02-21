@@ -21,7 +21,8 @@ Each feature should include contract validation when frontend-backend interactio
 Aim to cover core user journeys, async backend behavior, and integration boundaries.
 
 ## Commit & Pull Request Guidelines
-The repository currently ships without shared Git history, so default to Conventional Commits (`feat:`, `fix:`, `chore:`) to keep future changelog automation simple. Each pull request should describe the change, list manual verification steps (e.g., `pnpm dev` for frontend and backend service run/test commands), and link any tracking issue. Include screenshots or curl output for API changes and note follow-up tasks if you defer work.
+The repository currently ships without shared Git history, so default to Conventional Commits (`feat:`, `fix:`, `chore:`) to keep future changelog automation simple. Commit messages must always satisfy commit-lint compatible Conventional Commit format (for example: `feat(frontend): align header logo with figma`).
+Each pull request should describe the change, list manual verification steps (e.g., `pnpm dev` for frontend and backend service run/test commands), and link any tracking issue. Include screenshots or curl output for API changes and note follow-up tasks if you defer work.
 For feature branches, prefer semantic clarity over extreme brevity. Descriptive names like
 `todo-with-target-and-limit` are acceptable when they improve intent readability.
 
@@ -35,6 +36,8 @@ the frontend and backend toolchain versions used in development.
 - Python 3.12+ (backend), TypeScript 5.x (frontend) + FastAPI, Pydantic, SQLAlchemy + aiosqlite, React 19, Vite, pnpm (001-todo-with-target-and-limit)
 - SQLite (001-todo-with-target-and-limit)
 - Python 3.12+ (backend), TypeScript 5.x (frontend) + FastAPI, Pydantic, SQLAlchemy + aiosqlite, React 19, Vite, Tailwind CSS 4, pnpm (001-todo-with-target-and-limit)
+- TypeScript 5.x (frontend), Python 3.12+ (backend baseline unchanged) + React 19, Vite, Tailwind CSS 4, FastAPI existing API contracts (003-separate-pages-token-modal)
+- SQLite (unchanged) (003-separate-pages-token-modal)
 
 ## Recent Changes
 - 001-todo-with-target-and-limit: Added Python 3.12+ (backend), TypeScript 5.x (frontend) + FastAPI, Pydantic, SQLAlchemy + aiosqlite, React 19, Vite, pnpm

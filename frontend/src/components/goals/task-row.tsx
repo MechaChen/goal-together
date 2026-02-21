@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CheckCheck, Circle, CircleCheck, Pencil, Trash2, ShieldCheck } from "lucide-react";
 import type { TaskItem } from "../../services/reward-hierarchy.types";
 import { TaskEditor } from "./task-editor";
 
@@ -13,34 +14,50 @@ type TaskRowProps = {
 
 export function TaskRow({ task, onConfirm, onComplete, onDelete, onUpdate, completionHint }: TaskRowProps) {
   const [editing, setEditing] = useState(false);
+  const isDraft = task.lifecycle_state === "draft";
 
   return (
-    <div className="rounded border border-slate-200 p-3">
-      <div className="flex items-center gap-2">
+    <div className="border-b border-[var(--accent-line)] py-2 last:border-none">
+      <div className="flex items-start gap-2">
+        <div className="mt-0.5 text-[var(--accent-orange)]">
+          {task.is_completed ? <CircleCheck size={24} /> : <Circle size={24} className="text-[#6f7377]" />}
+        </div>
         <div className="flex-1">
-          <p className="font-medium text-slate-800">{task.title}</p>
-          <p className="text-xs text-slate-500">
+          <p className={`font-medium ${task.is_completed ? "text-[#9da0a3] line-through" : "text-[var(--ink-strong)]"}`}>{task.title}</p>
+          <p className="text-xs text-[var(--ink-soft)]">
             State: {task.lifecycle_state} · {task.is_completed ? "completed" : "not completed"}
           </p>
         </div>
 
-        {task.lifecycle_state === "draft" ? (
+          {isDraft ? (
           <>
-            <button className="rounded bg-blue-600 px-2 py-1 text-xs text-white" onClick={() => setEditing(true)}>
+            <button
+              className="inline-flex items-center gap-1 rounded-full border border-[#d8cdc5] bg-[#eee7e1] px-3 py-1 text-xs font-medium text-[var(--ink-soft)]"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil size={13} aria-hidden />
               Edit
             </button>
-            <button className="rounded bg-rose-600 px-2 py-1 text-xs text-white" onClick={() => void onDelete(task.id)}>
+            <button
+              className="inline-flex items-center gap-1 rounded-full border border-[#e4c6c3] bg-[#f1dfdd] px-3 py-1 text-xs font-medium text-[#b86864]"
+              onClick={() => void onDelete(task.id)}
+            >
+              <Trash2 size={13} aria-hidden />
               Delete
             </button>
-            <button className="rounded bg-emerald-600 px-2 py-1 text-xs text-white" onClick={() => void onConfirm(task.id)}>
+            <button
+              className="inline-flex items-center gap-1 rounded-full border border-[#b9d9c7] bg-[#ddece4] px-3 py-1 text-xs font-medium text-[#4f8f6f]"
+              onClick={() => void onConfirm(task.id)}
+            >
+              <ShieldCheck size={13} aria-hidden />
               Confirm
             </button>
           </>
         ) : (
           <div className="space-y-1 text-right">
             <button
-              className={`rounded px-2 py-1 text-xs text-white ${
-                task.is_completed ? "cursor-not-allowed bg-slate-300 text-slate-500" : "bg-slate-900"
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                task.is_completed ? "cursor-not-allowed bg-[#d1d1d1] text-[#8f8f8f]" : "bg-[var(--accent-orange)] text-white"
               }`}
               disabled={task.is_completed}
               aria-disabled={task.is_completed}
@@ -50,16 +67,17 @@ export function TaskRow({ task, onConfirm, onComplete, onDelete, onUpdate, compl
                 }
               }}
             >
+              <CheckCheck size={13} aria-hidden />
               {task.is_completed ? "Completed" : "Complete"}
             </button>
-            <p className="text-[11px] text-slate-500">Confirmed tasks cannot be deleted.</p>
-            {task.is_completed ? <p className="text-[11px] text-slate-500">This task is already completed.</p> : null}
+            <p className="text-[11px] text-[var(--ink-soft)]">Confirmed tasks cannot be deleted.</p>
+            {task.is_completed ? <p className="text-[11px] text-[var(--ink-soft)]">This task is already completed.</p> : null}
           </div>
         )}
       </div>
 
       {completionHint && task.lifecycle_state === "confirmed" ? (
-        <p className="mt-2 text-xs text-amber-700">Hint: {completionHint}</p>
+        <p className="mt-2 text-xs text-[#be8a31]">Hint: {completionHint}</p>
       ) : null}
 
       {editing ? (

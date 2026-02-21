@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ListTodo } from "lucide-react";
 
 import { HierarchySidebar } from "../components/layout/hierarchy-sidebar";
 import { TaskEditor } from "../components/goals/task-editor";
@@ -63,13 +64,16 @@ export function TasksPage({
         />
       </div>
 
-      <div className="flex-1 space-y-3 rounded border border-slate-200 bg-white p-4">
-        <h2 className="text-lg font-semibold text-slate-900">{subGoal ? `Tasks for ${subGoal.title}` : "Tasks"}</h2>
-        {!subGoal ? <p className="text-sm text-slate-500">Choose a Sub Goal in the sidebar.</p> : null}
+      <div className="flex-1 space-y-4 rounded-[32px] border border-[#ddd5ce] bg-[var(--panel-bg)] p-4 md:p-6">
+        <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-[var(--ink-strong)]">
+          <ListTodo size={19} aria-hidden />
+          <span>{subGoal ? `Tasks for ${subGoal.title}` : "Tasks"}</span>
+        </h2>
+        {!subGoal ? <p className="text-sm text-[var(--ink-soft)]">Choose a Sub Goal in the sidebar.</p> : null}
         {subGoal ? <TaskEditor submitLabel="Add task" onSubmit={(title) => onCreateTask(subGoal.id, title)} /> : null}
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="text-sm text-[#ba6461]">{error}</p> : null}
         {subGoal ? (
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-[24px] bg-[#e8e1db] px-4 py-3">
             {subGoal.tasks.map((task) => (
               <TaskRow
                 key={task.id}
