@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.reward_hierarchy_schema import TaskResponse
+from src.api.reward_hierarchy_schema import BulkConfirmDraftTasksResponse, TaskResponse
 from src.services.db import get_db
-from src.services.hierarchy_repository import confirm_task
+from src.services.hierarchy_repository import confirm_all_draft_tasks, confirm_task
 
 router = APIRouter(tags=["tasks"])
 
@@ -21,3 +21,8 @@ async def post_task_confirm(task_id: str, session: AsyncSession = Depends(get_db
         if item.first_rewarded_completion_at
         else None,
     }
+
+
+@router.post("/sub-goals/{sub_goal_id}/tasks/confirm-drafts", response_model=BulkConfirmDraftTasksResponse)
+async def post_sub_goal_confirm_drafts(sub_goal_id: str, session: AsyncSession = Depends(get_db)):
+    return await confirm_all_draft_tasks(session, sub_goal_id=sub_goal_id)

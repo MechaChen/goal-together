@@ -31,12 +31,16 @@ class MainGoalResponse(BaseModel):
     id: str
     title: str
     description: str | None = None
+    is_completed: bool = False
+    completed_at: str | None = None
 
 
 class SubGoalResponse(BaseModel):
     id: str
     main_goal_id: str
     title: str
+    is_completed: bool = False
+    completed_at: str | None = None
 
 
 class TaskResponse(BaseModel):
@@ -46,6 +50,39 @@ class TaskResponse(BaseModel):
     lifecycle_state: str
     is_completed: bool
     first_rewarded_completion_at: str | None = None
+
+
+class BulkConfirmDraftTasksResponse(BaseModel):
+    sub_goal_id: str
+    confirmed_count: int
+    already_confirmed_count: int
+    total_tasks_count: int
+
+
+class CompletionProgressResponse(BaseModel):
+    completed_count: int
+    total_count: int
+    percentage: int
+
+
+class CompleteSubGoalResponse(BaseModel):
+    sub_goal_id: str
+    is_completed: bool
+    completed_at: str | None = None
+    reward_granted: bool
+    reward_amount: int
+    wallet_balance: int
+    progress: CompletionProgressResponse
+
+
+class CompleteMainGoalResponse(BaseModel):
+    main_goal_id: str
+    is_completed: bool
+    completed_at: str | None = None
+    reward_granted: bool
+    reward_amount: int
+    wallet_balance: int
+    progress: CompletionProgressResponse
 
 
 class CompleteTaskResponse(BaseModel):
@@ -91,6 +128,8 @@ class TreeSubGoalResponse(BaseModel):
     id: str
     main_goal_id: str
     title: str
+    is_completed: bool = False
+    completed_at: str | None = None
     tasks: list[TreeTaskResponse]
 
 
@@ -98,6 +137,8 @@ class TreeMainGoalResponse(BaseModel):
     id: str
     title: str
     description: str | None = None
+    is_completed: bool = False
+    completed_at: str | None = None
     sub_goals: list[TreeSubGoalResponse]
 
 

@@ -59,6 +59,14 @@ async def update_main_goal(
 
 async def delete_main_goal(session: AsyncSession, main_goal_id: str) -> None:
     goal = await get_main_goal(session, main_goal_id)
+    confirmed_task_count_result = await session.execute(
+        select(func.count())
+        .select_from(TaskItem)
+        .join(SubGoal, TaskItem.sub_goal_id == SubGoal.id)
+        .where(SubGoal.main_goal_id == main_goal_id, TaskItem.lifecycle_state == CONFIRMED)
+    )
+    if int(confirmed_task_count_result.scalar_one()) > 0:
+        raise ConflictError("main goal with confirmed tasks cannot be deleted")
     await session.delete(goal)
     await session.commit()
 
@@ -97,6 +105,13 @@ async def update_sub_goal(session: AsyncSession, sub_goal_id: str, title: str) -
 
 async def delete_sub_goal(session: AsyncSession, sub_goal_id: str) -> None:
     sub_goal = await get_sub_goal(session, sub_goal_id)
+    confirmed_task_count_result = await session.execute(
+        select(func.count())
+        .select_from(TaskItem)
+        .where(TaskItem.sub_goal_id == sub_goal_id, TaskItem.lifecycle_state == CONFIRMED)
+    )
+    if int(confirmed_task_count_result.scalar_one()) > 0:
+        raise ConflictError("sub goal with confirmed tasks cannot be deleted")
     await session.delete(sub_goal)
     await session.commit()
 
@@ -146,6 +161,25 @@ async def confirm_task(session: AsyncSession, task_id: str) -> TaskItem:
     return task
 
 
+async def confirm_all_draft_tasks(session: AsyncSession, sub_goal_id: str) -> dict[str, int | str]:
+    tasks = await list_tasks(session, sub_goal_id=sub_goal_id)
+    confirmed_count = 0
+    already_confirmed_count = 0
+    for task in tasks:
+        if task.lifecycle_state == DRAFT:
+            task.lifecycle_state = CONFIRMED
+            confirmed_count += 1
+        else:
+            already_confirmed_count += 1
+    await session.commit()
+    return {
+        "sub_goal_id": sub_goal_id,
+        "confirmed_count": confirmed_count,
+        "already_confirmed_count": already_confirmed_count,
+        "total_tasks_count": len(tasks),
+    }
+
+
 async def delete_draft_task(session: AsyncSession, task_id: str) -> None:
     task = await get_task(session, task_id)
     if task.lifecycle_state != DRAFT:
@@ -192,6 +226,8 @@ async def get_hierarchy_tree(session: AsyncSession) -> list[dict[str, object]]:
                     "id": sub_goal.id,
                     "main_goal_id": sub_goal.main_goal_id,
                     "title": sub_goal.title,
+                    "is_completed": sub_goal.is_completed,
+                    "completed_at": sub_goal.completed_at.isoformat() if sub_goal.completed_at else None,
                     "tasks": sub_tasks,
                 }
             )
@@ -200,6 +236,8 @@ async def get_hierarchy_tree(session: AsyncSession) -> list[dict[str, object]]:
                 "id": goal.id,
                 "title": goal.title,
                 "description": goal.description,
+                "is_completed": goal.is_completed,
+                "completed_at": goal.completed_at.isoformat() if goal.completed_at else None,
                 "sub_goals": goal_sub_goals,
             }
         )

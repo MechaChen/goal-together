@@ -24,7 +24,6 @@ describe("task row checkbox completion state", () => {
         completionHint={null}
         onUpdate={vi.fn().mockResolvedValue(undefined)}
         onDelete={vi.fn().mockResolvedValue(undefined)}
-        onConfirm={vi.fn().mockResolvedValue(undefined)}
         onComplete={onComplete}
       />,
     );
@@ -45,7 +44,6 @@ describe("task row checkbox completion state", () => {
         completionHint={null}
         onUpdate={vi.fn().mockResolvedValue(undefined)}
         onDelete={vi.fn().mockResolvedValue(undefined)}
-        onConfirm={vi.fn().mockResolvedValue(undefined)}
         onComplete={onComplete}
       />,
     );
@@ -56,5 +54,19 @@ describe("task row checkbox completion state", () => {
 
     await userEvent.click(button);
     expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it("does not render per-task confirm action for draft tasks", () => {
+    render(
+      <TaskRow
+        task={{ ...baseTask, lifecycle_state: "draft", is_completed: false }}
+        completionHint={null}
+        onUpdate={vi.fn().mockResolvedValue(undefined)}
+        onDelete={vi.fn().mockResolvedValue(undefined)}
+        onComplete={vi.fn().mockResolvedValue(undefined)}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Confirm" })).toBeNull();
   });
 });

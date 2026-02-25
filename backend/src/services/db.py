@@ -1,5 +1,6 @@
 import os
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -30,3 +31,20 @@ async def init_db() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        if engine.url.drivername.startswith("sqlite"):
+            await _ensure_sqlite_hierarchy_columns(conn)
+
+
+async def _ensure_sqlite_hierarchy_columns(conn: AsyncConnection) -> None:
+    await _ensure_sqlite_column(conn, "main_goals", "is_completed", "ALTER TABLE main_goals ADD COLUMN is_completed BOOLEAN NOT NULL DEFAULT 0")
+    await _ensure_sqlite_column(conn, "main_goals", "completed_at", "ALTER TABLE main_goals ADD COLUMN completed_at DATETIME")
+    await _ensure_sqlite_column(conn, "sub_goals", "is_completed", "ALTER TABLE sub_goals ADD COLUMN is_completed BOOLEAN NOT NULL DEFAULT 0")
+    await _ensure_sqlite_column(conn, "sub_goals", "completed_at", "ALTER TABLE sub_goals ADD COLUMN completed_at DATETIME")
+
+
+async def _ensure_sqlite_column(conn: AsyncConnection, table: str, column: str, ddl: str) -> None:
+    pragma_result = await conn.execute(text(f"PRAGMA table_info({table})"))
+    existing_columns = {str(row[1]) for row in pragma_result.fetchall()}
+    if column in existing_columns:
+        return
+    await conn.execute(text(ddl))

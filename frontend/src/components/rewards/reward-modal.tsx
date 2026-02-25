@@ -8,6 +8,8 @@ import {
 import type { RewardModalQueueItem } from "../../services/reward-modal-queue.store";
 import goalTogetherCongragulation from "../../assets/images/goal-together-logo-congragulation.png";
 import goalTogetherFighting from "../../assets/images/goal-together-logo-fighting.png";
+import goalTogetherMainGoalCompleted from "../../assets/images/goal-together-logo-main-goal-completed.png";
+import goalTogetherSubGoalCompleted from "../../assets/images/goal-together-logo-subgoal-completed.png";
 import { TokenIcon } from "./token-icon";
 
 export function RewardModal() {
@@ -42,11 +44,19 @@ export function RewardModal() {
       ? goalTogetherCongragulation
       : active.reward_type === "SUBGOAL_NEAR_COMPLETE"
         ? goalTogetherFighting
+        : active.reward_type === "MAIN_GOAL_MANUAL_COMPLETE"
+          ? goalTogetherMainGoalCompleted
+          : active.reward_type === "SUBGOAL_MANUAL_COMPLETE"
+            ? goalTogetherSubGoalCompleted
         : null;
   const rewardLogoAlt =
     active.reward_type === "SUBGOAL_COMPLETE"
       ? "Sub goal complete reward"
-      : "Near complete reward";
+      : active.reward_type === "SUBGOAL_NEAR_COMPLETE"
+        ? "Near complete reward"
+        : active.reward_type === "MAIN_GOAL_MANUAL_COMPLETE"
+          ? "Main goal completed reward"
+          : "Sub goal completed reward";
   const milestoneMessage = active.reason || "Reward granted";
 
   return (

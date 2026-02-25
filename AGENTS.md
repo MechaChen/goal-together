@@ -49,6 +49,7 @@ Aim to cover core user journeys, async backend behavior, and integration boundar
 
 ## Commit & Pull Request Guidelines
 The repository currently ships without shared Git history, so default to Conventional Commits (`feat:`, `fix:`, `chore:`) to keep future changelog automation simple. Commit messages must always satisfy commit-lint compatible Conventional Commit format (for example: `feat(frontend): align header logo with figma`).
+When the user requests a commit, first summarize the current unstaged changes, then create a commit that follows commitlint-compatible Conventional Commit format, and include the user's previous requirement prompts in the commit description/body.
 Each pull request should describe the change, list manual verification steps (e.g., `pnpm dev` for frontend and backend service run/test commands), and link any tracking issue. Include screenshots or curl output for API changes and note follow-up tasks if you defer work.
 For feature branches, prefer semantic clarity over extreme brevity. Descriptive names like
 `todo-with-target-and-limit` are acceptable when they improve intent readability.

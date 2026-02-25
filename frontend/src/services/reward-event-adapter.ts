@@ -1,4 +1,8 @@
-import type { CompleteTaskResult } from "./reward-hierarchy.types";
+import type {
+  CompleteMainGoalResult,
+  CompleteSubGoalResult,
+  CompleteTaskResult,
+} from "./reward-hierarchy.types";
 import type { RewardModalQueueItem } from "./reward-modal-queue.store";
 
 function newQueueItem(
@@ -42,4 +46,32 @@ export function toRewardQueueItems(
     );
   }
   return items;
+}
+
+export function toSubGoalCompleteRewardQueueItem(
+  result: CompleteSubGoalResult,
+): RewardModalQueueItem | null {
+  if (!result.reward_granted || result.reward_amount <= 0) {
+    return null;
+  }
+  return newQueueItem(
+    "SUBGOAL_MANUAL_COMPLETE",
+    result.reward_amount,
+    "Sub goal completed",
+    3000,
+  );
+}
+
+export function toMainGoalCompleteRewardQueueItem(
+  result: CompleteMainGoalResult,
+): RewardModalQueueItem | null {
+  if (!result.reward_granted || result.reward_amount <= 0) {
+    return null;
+  }
+  return newQueueItem(
+    "MAIN_GOAL_MANUAL_COMPLETE",
+    result.reward_amount,
+    "Main goal completed",
+    3000,
+  );
 }

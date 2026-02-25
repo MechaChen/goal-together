@@ -6,10 +6,16 @@ import { MainGoalsPage } from "./pages/main-goals-page";
 import { RewardHistoryPage } from "./pages/reward-history-page";
 import { SubGoalsPage } from "./pages/sub-goals-page";
 import { TasksPage } from "./pages/tasks-page";
+import {
+  toMainGoalCompleteRewardQueueItem,
+  toRewardQueueItems,
+  toSubGoalCompleteRewardQueueItem,
+} from "./services/reward-event-adapter";
 import { toNameIdSegment } from "./services/route-segment";
 import { rewardHierarchyApi } from "./services/reward-hierarchy.client";
 import { loadRewardHistoryPageData } from "./services/reward-history-page.service";
-import type { MainGoalItem, RewardEvent } from "./services/reward-hierarchy.types";
+import type { AppToast, AppToastKind, MainGoalItem, RewardEvent } from "./services/reward-hierarchy.types";
+import { enqueueRewardModal, enqueueRewardModals } from "./services/reward-modal-queue.service";
 import { resolveLaunchPath } from "./services/navigation-launch.resolver";
 import {
   clearLastOpenedTasksContext,
@@ -43,6 +49,7 @@ function AppInner() {
   const [walletBalance, setWalletBalance] = useState(0);
   const [completionHint, setCompletionHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [appToast, setAppToast] = useState<AppToast | null>(null);
   const [dataReady, setDataReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -55,6 +62,14 @@ function AppInner() {
 
   const mainSegment = tasksMatch?.params.mainSegment ?? tasksMainOnlyMatch?.params.mainSegment ?? subGoalsMatch?.params.mainSegment ?? null;
   const subSegment = tasksMatch?.params.subSegment ?? null;
+
+  function notify(kind: AppToastKind, message: string) {
+    setAppToast({ kind, message });
+  }
+
+  function toErrorMessage(errorValue: unknown): string {
+    return errorValue instanceof Error ? errorValue.message : "Request failed";
+  }
 
   async function refreshData() {
     const [tree, history, wallet] = await Promise.all([
@@ -104,7 +119,6 @@ function AppInner() {
   const mainGoalsElement = (
     <MainGoalsPage
       items={items}
-      selectedMainGoalId={selectedMainGoalId}
       onOpenSubGoals={(id) => {
         const mainGoal = items.find((item) => item.id === id);
         if (!mainGoal) {
@@ -118,6 +132,28 @@ function AppInner() {
         await rewardHierarchyApi.createMainGoal(title, description);
         await refreshData();
       }}
+      onCompleteMainGoal={async (mainGoalId) => {
+        try {
+          const result = await rewardHierarchyApi.completeMainGoal(mainGoalId);
+          await refreshData();
+          const rewardItem = toMainGoalCompleteRewardQueueItem(result);
+          if (rewardItem) {
+            enqueueRewardModal(rewardItem);
+          }
+        } catch (err) {
+          notify("error", toErrorMessage(err));
+        }
+      }}
+      onDeleteMainGoal={async (mainGoalId) => {
+        try {
+          await rewardHierarchyApi.deleteMainGoal(mainGoalId);
+          await refreshData();
+          navigate("/main-goals");
+          notify("success", "Main goal deleted.");
+        } catch (err) {
+          notify("error", toErrorMessage(err));
+        }
+      }}
     />
   );
 
@@ -125,7 +161,6 @@ function AppInner() {
     <SubGoalsPage
       items={items}
       selectedMainGoalId={selectedMainGoalId}
-      selectedSubGoalId={selectedSubGoalId}
       onSelectMainGoal={(id) => {
         const mainGoal = items.find((item) => item.id === id);
         if (!mainGoal) {
@@ -157,6 +192,32 @@ function AppInner() {
       onCreateSubGoal={async (mainGoalId, title) => {
         await rewardHierarchyApi.createSubGoal(mainGoalId, title);
         await refreshData();
+      }}
+      onCompleteSubGoal={async (subGoalId) => {
+        try {
+          const result = await rewardHierarchyApi.completeSubGoal(subGoalId);
+          await refreshData();
+          const rewardItem = toSubGoalCompleteRewardQueueItem(result);
+          if (rewardItem) {
+            enqueueRewardModal(rewardItem);
+          }
+        } catch (err) {
+          notify("error", toErrorMessage(err));
+        }
+      }}
+      onDeleteSubGoal={async (subGoalId) => {
+        try {
+          await rewardHierarchyApi.deleteSubGoal(subGoalId);
+          await refreshData();
+          if (selectedMainGoal) {
+            navigate(`/sub-goals/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`);
+          } else {
+            navigate("/sub-goals");
+          }
+          notify("success", "Sub goal deleted.");
+        } catch (err) {
+          notify("error", toErrorMessage(err));
+        }
       }}
     />
   );
@@ -199,16 +260,21 @@ function AppInner() {
         await rewardHierarchyApi.deleteTask(taskId);
         await refreshData();
       }}
-      onConfirmTask={async (taskId) => {
-        await rewardHierarchyApi.confirmTask(taskId);
+      onConfirmDraftTasks={async (subGoalId) => {
+        const result = await rewardHierarchyApi.confirmDraftTasks(subGoalId);
         await refreshData();
+        return result;
       }}
       onCompleteTask={async (taskId) => {
         const result = await rewardHierarchyApi.completeTask(taskId);
         await refreshData();
+        if (!result.hint) {
+          enqueueRewardModals(toRewardQueueItems(result));
+        }
         return result;
       }}
       onCompletionHint={setCompletionHint}
+      onNotify={notify}
     />
   );
 
@@ -217,6 +283,8 @@ function AppInner() {
       isSidebarEnabled={hasSidebar}
       isSidebarOpen={hasSidebar && isSidebarOpen}
       walletBalance={walletBalance}
+      appToast={appToast}
+      onDismissToast={() => setAppToast(null)}
       onToggleSidebar={() => {
         if (!hasSidebar) {
           return;

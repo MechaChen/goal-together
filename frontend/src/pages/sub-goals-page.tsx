@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
 import { Circle, CircleCheck, Plus } from "lucide-react";
 
+import { RowMoreMenu } from "../components/actions/row-more-menu";
 import { HierarchySidebar } from "../components/layout/hierarchy-sidebar";
+import {
+  formatProgressFraction,
+  formatProgressLabel,
+  getSubGoalProgress,
+} from "../services/goal-progress";
 import type { MainGoalItem } from "../services/reward-hierarchy.types";
 
 type SubGoalsPageProps = {
   items: MainGoalItem[];
   selectedMainGoalId: string | null;
-  selectedSubGoalId: string | null;
   onCreateSubGoal: (mainGoalId: string, title: string) => Promise<void>;
+  onCompleteSubGoal: (subGoalId: string) => Promise<void>;
+  onDeleteSubGoal: (subGoalId: string) => Promise<void>;
   onSelectMainGoal: (id: string) => void;
   onOpenTasks: (id: string) => void;
   onBackToMain: () => void;
@@ -16,11 +23,68 @@ type SubGoalsPageProps = {
   onCloseSidebar: () => void;
 };
 
+type SubGoalListItemProps = {
+  subGoal: MainGoalItem["sub_goals"][number];
+  onOpenTasks: (id: string) => void;
+  onCompleteSubGoal: (subGoalId: string) => Promise<void>;
+  onDeleteSubGoal: (subGoalId: string) => Promise<void>;
+};
+
+function SubGoalListItem({
+  subGoal,
+  onOpenTasks,
+  onCompleteSubGoal,
+  onDeleteSubGoal,
+}: SubGoalListItemProps) {
+  const progress = getSubGoalProgress(subGoal);
+
+  return (
+    <li className="border-b border-line-soft py-2 last:border-none">
+      <div className="flex items-start gap-2">
+        <button
+          className={`mt-0.5 text-accent-orange ${subGoal.is_completed ? "cursor-not-allowed" : ""}`}
+          aria-label={subGoal.is_completed ? `Sub goal ${subGoal.title} completed` : `Complete sub goal ${subGoal.title}`}
+          disabled={subGoal.is_completed}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (!subGoal.is_completed) {
+              void onCompleteSubGoal(subGoal.id);
+            }
+          }}
+          type="button"
+        >
+          {subGoal.is_completed ? (
+            <CircleCheck size={24} />
+          ) : (
+            <Circle size={24} className="text-ink-icon" />
+          )}
+        </button>
+        <button className="flex-1 text-left" onClick={() => onOpenTasks(subGoal.id)} type="button">
+          <div className="flex-1">
+            <p className={`font-medium ${subGoal.is_completed ? "text-ink-disabled line-through" : "text-ink-strong"}`}>
+              {subGoal.title}
+            </p>
+            <p className="text-xs font-medium text-ink-soft">
+              {formatProgressLabel(progress)} · {formatProgressFraction(progress)}
+            </p>
+          </div>
+        </button>
+        <RowMoreMenu
+          menuLabel="More actions"
+          confirmMessage={`Delete sub goal \"${subGoal.title}\"?`}
+          onDelete={async () => onDeleteSubGoal(subGoal.id)}
+        />
+      </div>
+    </li>
+  );
+}
+
 export function SubGoalsPage({
   items,
   selectedMainGoalId,
-  selectedSubGoalId,
   onCreateSubGoal,
+  onCompleteSubGoal,
+  onDeleteSubGoal,
   onSelectMainGoal,
   onOpenTasks,
   onBackToMain,
@@ -120,32 +184,13 @@ export function SubGoalsPage({
                 </li>
               ) : null}
               {mainGoal.sub_goals.map((subGoal) => (
-                <li
+                <SubGoalListItem
                   key={subGoal.id}
-                  className="border-b border-line-soft last:border-none"
-                >
-                  <button
-                    className="w-full py-2 text-left"
-                    onClick={() => onOpenTasks(subGoal.id)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="mt-0.5 text-accent-orange">
-                        {selectedSubGoalId === subGoal.id ? (
-                          <CircleCheck size={24} />
-                        ) : (
-                          <Circle size={24} className="text-ink-icon" />
-                        )}
-                      </span>
-                      <div className="flex-1">
-                        <p
-                          className={`font-medium ${selectedSubGoalId === subGoal.id ? "text-ink-disabled line-through" : "text-ink-strong"}`}
-                        >
-                          {subGoal.title}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                </li>
+                  subGoal={subGoal}
+                  onOpenTasks={onOpenTasks}
+                  onCompleteSubGoal={onCompleteSubGoal}
+                  onDeleteSubGoal={onDeleteSubGoal}
+                />
               ))}
             </ul>
           </>

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Menu } from "lucide-react";
 import goalTogetherLogo from "../../assets/images/goal-together-logo.png";
 import goalTogetherTitle from "../../assets/images/goal-together-title.png";
+import { AppToastBanner } from "../feedback/app-toast";
+import type { AppToast } from "../../services/reward-hierarchy.types";
 
 import { RewardModal } from "../rewards/reward-modal";
 import { TokenIcon } from "../rewards/token-icon";
@@ -12,6 +14,8 @@ type AppShellProps = {
   isSidebarEnabled: boolean;
   onToggleSidebar: () => void;
   walletBalance: number;
+  appToast: AppToast | null;
+  onDismissToast: () => void;
 };
 
 export function AppShell({
@@ -20,9 +24,12 @@ export function AppShell({
   isSidebarEnabled,
   onToggleSidebar,
   walletBalance,
+  appToast,
+  onDismissToast,
 }: AppShellProps) {
   return (
     <main className="space-y-4 pb-4 md:pb-6">
+      <AppToastBanner toast={appToast} onClose={onDismissToast} />
       <header className="border-y border-panel bg-surface-card">
         <div className="flex items-center justify-center px-4 py-4 relative">
           <button

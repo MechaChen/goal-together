@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { App } from "../src/app";
@@ -12,7 +13,7 @@ afterEach(() => {
   restore = null;
 });
 
-function createTreeWithFiveTasks(): MainGoalItem[] {
+function createTreeWithDraftTasks(): MainGoalItem[] {
   return [
     {
       id: "g1",
@@ -44,30 +45,6 @@ function createTreeWithFiveTasks(): MainGoalItem[] {
               is_completed: false,
               first_rewarded_completion_at: null,
             },
-            {
-              id: "t3",
-              sub_goal_id: "s1",
-              title: "Task 3",
-              lifecycle_state: "confirmed",
-              is_completed: false,
-              first_rewarded_completion_at: null,
-            },
-            {
-              id: "t4",
-              sub_goal_id: "s1",
-              title: "Task 4",
-              lifecycle_state: "confirmed",
-              is_completed: true,
-              first_rewarded_completion_at: null,
-            },
-            {
-              id: "t5",
-              sub_goal_id: "s1",
-              title: "Task 5",
-              lifecycle_state: "draft",
-              is_completed: false,
-              first_rewarded_completion_at: null,
-            },
           ],
         },
       ],
@@ -75,19 +52,16 @@ function createTreeWithFiveTasks(): MainGoalItem[] {
   ];
 }
 
-describe("tasks limit", () => {
-  it("disables task creation and shows the 5-task limit message", async () => {
-    restore = installMockApi({ tree: createTreeWithFiveTasks() }).restore;
+describe("tasks bulk confirm", () => {
+  it("confirms all draft tasks at once and shows success toast", async () => {
+    restore = installMockApi({ tree: createTreeWithDraftTasks() }).restore;
     window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
 
     render(<App />);
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
-    expect(screen.getByText("Task limit reached (5 per sub goal). Delete a task to add a new one.")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Confirm Draft Tasks" }));
 
-    const input = screen.getByPlaceholderText("Task title") as HTMLInputElement;
-    const addButton = screen.getByRole("button", { name: "Add task" }) as HTMLButtonElement;
-    expect(input.disabled).toBe(true);
-    expect(addButton.disabled).toBe(true);
+    await waitFor(() => expect(screen.getByText("Confirmed 2 draft task(s).")).toBeTruthy());
   });
 });

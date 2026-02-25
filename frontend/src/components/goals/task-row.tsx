@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Circle, CircleCheck, Pencil, Trash2, ShieldCheck } from "lucide-react";
+import { Circle, CircleCheck, Pencil, Trash2 } from "lucide-react";
 import type { TaskItem } from "../../services/reward-hierarchy.types";
 import { TaskEditor } from "./task-editor";
 
 type TaskRowProps = {
   task: TaskItem;
-  onConfirm: (taskId: string) => Promise<void>;
   onComplete: (taskId: string) => Promise<void>;
   onDelete: (taskId: string) => Promise<void>;
   onUpdate: (taskId: string, title: string) => Promise<void>;
@@ -14,7 +13,6 @@ type TaskRowProps = {
 
 export function TaskRow({
   task,
-  onConfirm,
   onComplete,
   onDelete,
   onUpdate,
@@ -92,13 +90,6 @@ export function TaskRow({
             >
               <Trash2 size={13} aria-hidden />
               Delete
-            </button>
-            <button
-              className="inline-flex items-center gap-1 rounded-full border border-success bg-success-bg px-3 py-1 text-xs font-medium text-success-text"
-              onClick={() => void onConfirm(task.id)}
-            >
-              <ShieldCheck size={13} aria-hidden />
-              Confirm
             </button>
           </>
         ) : (

@@ -126,10 +126,6 @@ export function TokenHierarchyPage() {
           await rewardHierarchyApi.deleteTask(taskId);
           await refresh();
         }}
-        onConfirmTask={async (taskId) => {
-          await rewardHierarchyApi.confirmTask(taskId);
-          await refresh();
-        }}
         onCompleteTask={completeTask}
       />
 

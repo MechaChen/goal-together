@@ -9,7 +9,6 @@ type GoalTreeProps = {
   onCreateTask: (subGoalId: string, title: string) => Promise<void>;
   onUpdateTask: (taskId: string, title: string) => Promise<void>;
   onDeleteTask: (taskId: string) => Promise<void>;
-  onConfirmTask: (taskId: string) => Promise<void>;
   onCompleteTask: (taskId: string) => Promise<void>;
 };
 
@@ -20,7 +19,6 @@ export function GoalTree({
   onCreateTask,
   onUpdateTask,
   onDeleteTask,
-  onConfirmTask,
   onCompleteTask,
 }: GoalTreeProps) {
   if (items.length === 0) {
@@ -57,7 +55,6 @@ export function GoalTree({
                       completionHint={completionHint}
                       onUpdate={onUpdateTask}
                       onDelete={onDeleteTask}
-                      onConfirm={onConfirmTask}
                       onComplete={onCompleteTask}
                     />
                   ))}

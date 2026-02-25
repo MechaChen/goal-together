@@ -1,13 +1,20 @@
 import { FormEvent, useState } from "react";
 import { CircleCheck, Circle, Plus, History } from "lucide-react";
+import { RowMoreMenu } from "../components/actions/row-more-menu";
 import { MAIN_GOALS_PAGE_COPY, MAIN_GOALS_PAGE_UI } from "../config/main-goals-page.config";
+import {
+  formatProgressFraction,
+  formatProgressLabel,
+  getMainGoalProgress,
+} from "../services/goal-progress";
 
 import type { MainGoalItem } from "../services/reward-hierarchy.types";
 
 type MainGoalsPageProps = {
   items: MainGoalItem[];
-  selectedMainGoalId: string | null;
   onCreateMainGoal: (title: string, description?: string) => Promise<void>;
+  onDeleteMainGoal: (id: string) => Promise<void>;
+  onCompleteMainGoal: (id: string) => Promise<void>;
   onOpenSubGoals: (id: string) => void;
   onOpenRewardHistory: () => void;
 };
@@ -16,12 +23,8 @@ function buildMainGoalDescription(goal: MainGoalItem): string {
   return goal.description ?? MAIN_GOALS_PAGE_COPY.noDescription;
 }
 
-function isSelectedMainGoal(goalId: string, selectedMainGoalId: string | null): boolean {
-  return selectedMainGoalId === goalId;
-}
-
-function getMainGoalTitleClass(selected: boolean): string {
-  return selected ? "font-medium text-ink-disabled line-through" : "font-medium text-ink-strong";
+function getMainGoalTitleClass(isCompleted: boolean): string {
+  return isCompleted ? "font-medium text-ink-disabled line-through" : "font-medium text-ink-strong";
 }
 
 type MainGoalsHeaderProps = {
@@ -92,51 +95,83 @@ function MainGoalsEmptyState() {
 
 type MainGoalListItemProps = {
   goal: MainGoalItem;
-  selectedMainGoalId: string | null;
   onOpenSubGoals: (id: string) => void;
+  onCompleteMainGoal: (id: string) => Promise<void>;
+  onDeleteMainGoal: (id: string) => Promise<void>;
 };
 
-function MainGoalListItem({ goal, selectedMainGoalId, onOpenSubGoals }: MainGoalListItemProps) {
-  const selected = isSelectedMainGoal(goal.id, selectedMainGoalId);
-  const titleClass = getMainGoalTitleClass(selected);
+function MainGoalListItem({
+  goal,
+  onOpenSubGoals,
+  onCompleteMainGoal,
+  onDeleteMainGoal,
+}: MainGoalListItemProps) {
+  const titleClass = getMainGoalTitleClass(goal.is_completed);
   const description = buildMainGoalDescription(goal);
+  const progress = getMainGoalProgress(goal);
 
   return (
-    <li className="border-b border-line-soft last:border-none">
-      <button className="w-full py-2 text-left" onClick={() => onOpenSubGoals(goal.id)}>
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 text-accent-orange">
-            {selected ? (
-              <CircleCheck size={MAIN_GOALS_PAGE_UI.statusIconSize} />
-            ) : (
-              <Circle size={MAIN_GOALS_PAGE_UI.statusIconSize} className="text-ink-icon" />
-            )}
-          </span>
+    <li className="border-b border-line-soft py-2 last:border-none">
+      <div className="flex items-start gap-2">
+        <button
+          className={`mt-0.5 text-accent-orange ${goal.is_completed ? "cursor-not-allowed" : ""}`}
+          aria-label={goal.is_completed ? `Main goal ${goal.title} completed` : `Complete main goal ${goal.title}`}
+          disabled={goal.is_completed}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (!goal.is_completed) {
+              void onCompleteMainGoal(goal.id);
+            }
+          }}
+          type="button"
+        >
+          {goal.is_completed ? (
+            <CircleCheck size={MAIN_GOALS_PAGE_UI.statusIconSize} />
+          ) : (
+            <Circle size={MAIN_GOALS_PAGE_UI.statusIconSize} className="text-ink-icon" />
+          )}
+        </button>
+        <button className="flex-1 text-left" onClick={() => onOpenSubGoals(goal.id)} type="button">
           <div className="flex-1">
             <p className={titleClass}>{goal.title}</p>
             <p className="text-xs text-ink-soft">{description}</p>
+            <p className="text-xs font-medium text-ink-soft">
+              {formatProgressLabel(progress)} · {formatProgressFraction(progress)}
+            </p>
           </div>
-        </div>
-      </button>
+        </button>
+        <RowMoreMenu
+          menuLabel="More actions"
+          confirmMessage={`Delete main goal \"${goal.title}\"?`}
+          onDelete={async () => onDeleteMainGoal(goal.id)}
+        />
+      </div>
     </li>
   );
 }
 
 type MainGoalsListProps = {
   items: MainGoalItem[];
-  selectedMainGoalId: string | null;
   onOpenSubGoals: (id: string) => void;
+  onCompleteMainGoal: (id: string) => Promise<void>;
+  onDeleteMainGoal: (id: string) => Promise<void>;
 };
 
-function MainGoalsList({ items, selectedMainGoalId, onOpenSubGoals }: MainGoalsListProps) {
+function MainGoalsList({
+  items,
+  onOpenSubGoals,
+  onCompleteMainGoal,
+  onDeleteMainGoal,
+}: MainGoalsListProps) {
   return (
     <ul className="space-y-2 rounded-[28px] bg-surface-list px-4 py-3">
       {items.map((goal) => (
         <MainGoalListItem
           key={goal.id}
           goal={goal}
-          selectedMainGoalId={selectedMainGoalId}
           onOpenSubGoals={onOpenSubGoals}
+          onCompleteMainGoal={onCompleteMainGoal}
+          onDeleteMainGoal={onDeleteMainGoal}
         />
       ))}
     </ul>
@@ -145,8 +180,9 @@ function MainGoalsList({ items, selectedMainGoalId, onOpenSubGoals }: MainGoalsL
 
 export function MainGoalsPage({
   items,
-  selectedMainGoalId,
   onCreateMainGoal,
+  onCompleteMainGoal,
+  onDeleteMainGoal,
   onOpenSubGoals,
   onOpenRewardHistory,
 }: MainGoalsPageProps) {
@@ -178,8 +214,9 @@ export function MainGoalsPage({
       {items.length === 0 ? <MainGoalsEmptyState /> : null}
       <MainGoalsList
         items={items}
-        selectedMainGoalId={selectedMainGoalId}
         onOpenSubGoals={onOpenSubGoals}
+        onCompleteMainGoal={onCompleteMainGoal}
+        onDeleteMainGoal={onDeleteMainGoal}
       />
     </section>
   );

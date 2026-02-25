@@ -1,5 +1,8 @@
 import type {
+  BulkConfirmDraftTasksResult,
   ApiErrorShape,
+  CompleteMainGoalResult,
+  CompleteSubGoalResult,
   CompleteTaskResult,
   HierarchyResponse,
   MainGoalItem,
@@ -51,15 +54,35 @@ export const rewardHierarchyApi = {
       method: "POST",
       body: JSON.stringify({ title, description }),
     }),
+  deleteMainGoal: (mainGoalId: string) =>
+    request<void>(`/main-goals/${mainGoalId}`, {
+      method: "DELETE",
+    }),
+  completeMainGoal: (mainGoalId: string) =>
+    request<CompleteMainGoalResult>(`/main-goals/${mainGoalId}/complete`, {
+      method: "POST",
+    }),
   createSubGoal: (mainGoalId: string, title: string) =>
     request<SubGoalItem>(`/main-goals/${mainGoalId}/sub-goals`, {
       method: "POST",
       body: JSON.stringify({ title }),
     }),
+  completeSubGoal: (subGoalId: string) =>
+    request<CompleteSubGoalResult>(`/sub-goals/${subGoalId}/complete`, {
+      method: "POST",
+    }),
+  deleteSubGoal: (subGoalId: string) =>
+    request<void>(`/sub-goals/${subGoalId}`, {
+      method: "DELETE",
+    }),
   createDraftTask: (subGoalId: string, title: string) =>
     request<TaskItem>(`/sub-goals/${subGoalId}/tasks`, {
       method: "POST",
       body: JSON.stringify({ title }),
+    }),
+  confirmDraftTasks: (subGoalId: string) =>
+    request<BulkConfirmDraftTasksResult>(`/sub-goals/${subGoalId}/tasks/confirm-drafts`, {
+      method: "POST",
     }),
   updateTask: (taskId: string, title: string) =>
     request<TaskItem>(`/tasks/${taskId}`, {

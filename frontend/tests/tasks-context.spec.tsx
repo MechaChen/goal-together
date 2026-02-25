@@ -19,11 +19,11 @@ describe("tasks context gating", () => {
 
     render(<App />);
 
-    await waitFor(() => expect(screen.getByRole("button", { name: /Main Goal 1/i })).toBeTruthy());
-    await userEvent.click(screen.getByRole("button", { name: /Main Goal 1/i }));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Main Goal 1/i }).length).toBeGreaterThan(0));
+    await userEvent.click(screen.getAllByRole("button", { name: /Main Goal 1/i }).at(-1)!);
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals for Main Goal 1" })).toBeTruthy());
 
-    await userEvent.click(screen.getByRole("button", { name: "Sub Goal 1" }));
+    await userEvent.click(screen.getAllByRole("button", { name: /Sub Goal 1/i }).at(-1)!);
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
   });
 });
