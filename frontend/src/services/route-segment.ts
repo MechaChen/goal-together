@@ -12,3 +12,14 @@ export function toNameIdSegment(name: string, id: string): string {
   return `${slug}-${encodeURIComponent(id)}`;
 }
 
+export function extractIdFromNameIdSegment(segment: string): string | null {
+  const index = segment.lastIndexOf("-");
+  if (index < 0 || index === segment.length - 1) {
+    return null;
+  }
+  try {
+    return decodeURIComponent(segment.slice(index + 1));
+  } catch {
+    return null;
+  }
+}

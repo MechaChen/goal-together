@@ -33,7 +33,7 @@ export type WalletSummary = {
 
 export type RewardEvent = {
   id: string;
-  event_type: "TASK_COMPLETE" | "MILESTONE_5X";
+  event_type: "TASK_COMPLETE" | "SUBGOAL_NEAR_COMPLETE" | "SUBGOAL_COMPLETE";
   token_amount: number;
   task_id: string | null;
   rewarded_completion_counter: number | null;
@@ -46,8 +46,9 @@ export type RewardHistoryResponse = {
 
 export type CompleteTaskResult = {
   task_reward: number;
-  milestone_reward: number;
-  milestone_applied: boolean;
+  extra_reward: number;
+  extra_reward_type: "SUBGOAL_NEAR_COMPLETE" | "SUBGOAL_COMPLETE" | null;
+  extra_reward_message: string | null;
   rewarded_completion_count: number;
   wallet_balance: number;
   hint: string | null;

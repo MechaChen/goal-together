@@ -2,18 +2,51 @@
 
 @theme {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --color-surface-page: #ffffff;
+  --color-surface-card: #f1ece6;
+  --color-surface-subtle: #ece7e2;
+  --color-surface-muted: #eee7e1;
+  --color-surface-list: #e8e1db;
+  --color-surface-list-alt: #ebe4de;
+  --color-panel: #ddd5ce;
+  --color-soft: #dfd6cf;
+  --color-muted: #d8cdc5;
+  --color-card: #ddcfc2;
+  --color-danger: #e4c6c3;
+  --color-success: #b9d9c7;
+  --color-border-panel: #ddd5ce;
+  --color-border-soft: #dfd6cf;
+  --color-border-muted: #d8cdc5;
+  --color-border-card: #ddcfc2;
+  --color-border-danger: #e4c6c3;
+  --color-border-success: #b9d9c7;
+  --color-line-soft: #abd9e8;
+  --color-ink-strong: #323232;
+  --color-ink-soft: #8f8f8f;
+  --color-ink-disabled: #9da0a3;
+  --color-ink-icon: #6f7377;
+  --color-accent-orange: #d98326;
+  --color-accent-blue: #76b7cd;
+  --color-danger-soft: #d9aaa5;
+  --color-error: #b95858;
+  --color-error-strong: #ba6461;
+  --color-warning: #be8a31;
+  --color-danger-bg: #f1dfdd;
+  --color-danger-text: #b86864;
+  --color-success-bg: #ddece4;
+  --color-success-text: #4f8f6f;
 }
 
 :root {
-  --surface-page: #ffffff;
-  --surface-card: #f1ece6;
-  --surface-subtle: #ece7e2;
-  --line-soft: #abd9e8;
-  --ink-strong: #323232;
-  --ink-soft: #8f8f8f;
-  --accent-orange: #d98326;
-  --accent-blue: #76b7cd;
-  --danger-soft: #d9aaa5;
+  --surface-page: var(--color-surface-page);
+  --surface-card: var(--color-surface-card);
+  --surface-subtle: var(--color-surface-subtle);
+  --line-soft: var(--color-line-soft);
+  --ink-strong: var(--color-ink-strong);
+  --ink-soft: var(--color-ink-soft);
+  --accent-orange: var(--color-accent-orange);
+  --accent-blue: var(--color-accent-blue);
+  --danger-soft: var(--color-danger-soft);
 
   /* Backward-compatible aliases for existing components */
   --app-bg: var(--surface-page);
@@ -60,8 +93,10 @@ select {
 }
 
 .reward-coin-flip {
-  transform-style: preserve-3d;
-  perspective: 960px;
   animation: rewardCoinFlip 1s linear infinite;
   will-change: transform;
+}
+
+.primary-navigation-panel {
+  content-visibility: auto;
 }

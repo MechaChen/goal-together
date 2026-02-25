@@ -2,10 +2,14 @@
 
 ## Todos
 
-- [] coin style is not good looking, modify it
-- [] sidebar should be togglable
-- [] main page should be the last ongoing tasks list
+- [x] coin style is not good looking, modify it
+- [x] sidebar should be togglable
+- [x] main page should be the last ongoing tasks list
 - [] if the subgoal is done, switch to next subgoal
+- [] add voice effect when getting token
+- [] AI feature - suggest a strong sense of achievement with little effort
+- [] all draft tasks should be confirm all tasks at once
+- [] when all tasks of any sub goal are completed, the subgoal should be checked
 
 ## Prerequisites
 

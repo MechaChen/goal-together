@@ -2,8 +2,9 @@ import type { MainGoalItem, RewardEvent } from "../src/services/reward-hierarchy
 
 export type CompletionResponse = {
   task_reward: number;
-  milestone_reward: number;
-  milestone_applied: boolean;
+  extra_reward: number;
+  extra_reward_type: "SUBGOAL_NEAR_COMPLETE" | "SUBGOAL_COMPLETE" | null;
+  extra_reward_message: string | null;
   rewarded_completion_count: number;
   wallet_balance: number;
   hint: string | null;

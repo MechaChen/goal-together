@@ -7,8 +7,9 @@ import { installMockApi, type CompletionResponse } from "./mock-api";
 
 const success: CompletionResponse = {
   task_reward: 10,
-  milestone_reward: 0,
-  milestone_applied: false,
+  extra_reward: 0,
+  extra_reward_type: null,
+  extra_reward_message: null,
   rewarded_completion_count: 1,
   wallet_balance: 10,
   hint: null,
@@ -38,7 +39,7 @@ describe("reward modal trigger", () => {
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
 
-    await userEvent.click(screen.getByRole("button", { name: "Complete" }));
+    await userEvent.click(screen.getByRole("button", { name: "Complete task Task 1" }));
 
     await waitFor(() => expect(screen.getByTestId("reward-modal")).toBeTruthy());
     expect(screen.getByText("+10 tokens")).toBeTruthy();

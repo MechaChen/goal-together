@@ -10,33 +10,80 @@ import { toNameIdSegment } from "./services/route-segment";
 import { rewardHierarchyApi } from "./services/reward-hierarchy.client";
 import { loadRewardHistoryPageData } from "./services/reward-history-page.service";
 import type { MainGoalItem, RewardEvent } from "./services/reward-hierarchy.types";
+import { resolveLaunchPath } from "./services/navigation-launch.resolver";
+import {
+  clearLastOpenedTasksContext,
+  readLastOpenedTasksContext,
+  writeLastOpenedTasksContext,
+} from "./services/navigation-launch.storage";
+import { isTasksPath } from "./services/navigation-launch.routes";
+
+function RootEntryRedirect({ items }: { items: MainGoalItem[] }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedContext = readLastOpenedTasksContext();
+    const resolution = resolveLaunchPath({
+      entryPathname: "/",
+      savedContext,
+      items,
+    });
+    if (savedContext && !resolution.isSavedContextValid) {
+      clearLastOpenedTasksContext();
+    }
+    navigate(resolution.path, { replace: true });
+  }, [items, navigate]);
+
+  return null;
+}
 
 function AppInner() {
   const [items, setItems] = useState<MainGoalItem[]>([]);
   const [historyItems, setHistoryItems] = useState<RewardEvent[]>([]);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [completionHint, setCompletionHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dataReady, setDataReady] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const subGoalsMatch = matchPath("/sub-goals/:mainSegment", location.pathname);
   const tasksMatch = matchPath("/tasks/:mainSegment/:subSegment", location.pathname);
   const tasksMainOnlyMatch = matchPath("/tasks/:mainSegment", location.pathname);
+  const hasSidebar = location.pathname.startsWith("/sub-goals") || location.pathname.startsWith("/tasks");
 
   const mainSegment = tasksMatch?.params.mainSegment ?? tasksMainOnlyMatch?.params.mainSegment ?? subGoalsMatch?.params.mainSegment ?? null;
   const subSegment = tasksMatch?.params.subSegment ?? null;
 
   async function refreshData() {
-    const [tree, history] = await Promise.all([rewardHierarchyApi.listTree(), loadRewardHistoryPageData()]);
+    const [tree, history, wallet] = await Promise.all([
+      rewardHierarchyApi.listTree(),
+      loadRewardHistoryPageData(),
+      rewardHierarchyApi.wallet(),
+    ]);
     setItems(tree.items);
     setHistoryItems(history);
+    setWalletBalance(wallet.balance);
   }
 
   useEffect(() => {
     void refreshData().catch((err) => {
       setError(err instanceof Error ? err.message : "Failed to load app data");
-    });
+    }).finally(() => setDataReady(true));
   }, []);
+
+  useEffect(() => {
+    if (isTasksPath(location.pathname)) {
+      writeLastOpenedTasksContext(location.pathname);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!hasSidebar && isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+  }, [hasSidebar, isSidebarOpen]);
 
   const selectedMainGoal = useMemo(
     () => items.find((goal) => mainSegment !== null && toNameIdSegment(goal.title, goal.id) === mainSegment) ?? null,
@@ -105,6 +152,8 @@ function AppInner() {
         );
       }}
       onBackToMain={() => navigate("/main-goals")}
+      isSidebarOpen={hasSidebar && isSidebarOpen}
+      onCloseSidebar={() => setIsSidebarOpen(false)}
       onCreateSubGoal={async (mainGoalId, title) => {
         await rewardHierarchyApi.createSubGoal(mainGoalId, title);
         await refreshData();
@@ -136,6 +185,8 @@ function AppInner() {
         );
       }}
       onBackToMain={() => navigate("/main-goals")}
+      isSidebarOpen={hasSidebar && isSidebarOpen}
+      onCloseSidebar={() => setIsSidebarOpen(false)}
       onCreateTask={async (subGoalId, title) => {
         await rewardHierarchyApi.createDraftTask(subGoalId, title);
         await refreshData();
@@ -162,10 +213,20 @@ function AppInner() {
   );
 
   return (
-    <AppShell>
+    <AppShell
+      isSidebarEnabled={hasSidebar}
+      isSidebarOpen={hasSidebar && isSidebarOpen}
+      walletBalance={walletBalance}
+      onToggleSidebar={() => {
+        if (!hasSidebar) {
+          return;
+        }
+        setIsSidebarOpen((value) => !value);
+      }}
+    >
       {error ? <p className="rounded bg-red-100 px-3 py-2 text-sm text-red-700">{error}</p> : null}
       <Routes>
-        <Route path="/" element={<Navigate to="/main-goals" replace />} />
+        <Route path="/" element={dataReady ? <RootEntryRedirect items={items} /> : <p className="text-sm text-ink-soft">Loading...</p>} />
         <Route path="/main-goals" element={mainGoalsElement} />
         <Route path="/sub-goals" element={subGoalsElement} />
         <Route path="/sub-goals/:mainSegment" element={subGoalsElement} />

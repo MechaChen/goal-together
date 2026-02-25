@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ListTodo } from "lucide-react";
 
 import { HierarchySidebar } from "../components/layout/hierarchy-sidebar";
@@ -22,6 +22,8 @@ type TasksPageProps = {
   onCompletionHint: (hint: string | null) => void;
   onSelectSubGoal: (id: string) => void;
   onBackToMain: () => void;
+  isSidebarOpen: boolean;
+  onCloseSidebar: () => void;
 };
 
 export function TasksPage({
@@ -37,6 +39,8 @@ export function TasksPage({
   onCompletionHint,
   onSelectSubGoal,
   onBackToMain,
+  isSidebarOpen,
+  onCloseSidebar,
 }: TasksPageProps) {
   const selectedMainGoal = useMemo(
     () => items.find((goal) => goal.id === selectedMainGoalId) ?? null,
@@ -50,30 +54,81 @@ export function TasksPage({
   }, [subGoals, selectedSubGoalId]);
 
   const [error, setError] = useState<string | null>(null);
+  const isTaskLimitReached = !!subGoal && subGoal.tasks.length >= 5;
+  const taskLimitMessage = "Task limit reached (5 per sub goal). Delete a task to add a new one.";
+
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onCloseSidebar();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSidebarOpen, onCloseSidebar]);
 
   return (
-    <section className="flex flex-col gap-4 md:flex-row">
-      <div className="w-full space-y-3 md:w-72">
-        <HierarchySidebar
-          title="Sub Goals"
-          items={subGoals.map((item) => ({ id: item.id, title: item.title }))}
-          selectedId={selectedSubGoalId}
-          emptyText={selectedMainGoal ? "No sub goals for this main goal yet." : "Choose a main goal first."}
-          onSelect={onSelectSubGoal}
-          onBackToMain={onBackToMain}
-        />
-      </div>
-
-      <div className="flex-1 space-y-4 rounded-[32px] border border-[#ddd5ce] bg-[var(--panel-bg)] p-4 md:p-6">
-        <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-[var(--ink-strong)]">
+    <section className="relative">
+      {isSidebarOpen ? (
+        <>
+          <button
+            aria-label="Close sidebar overlay"
+            className="fixed inset-0 z-30 bg-transparent"
+            onClick={onCloseSidebar}
+            type="button"
+          />
+          <div className="fixed left-4 top-32 z-40 w-[320px] max-w-[calc(100vw-2rem)]" id="hierarchy-sidebar-panel">
+            <HierarchySidebar
+              title="Sub Goals"
+              items={subGoals.map((item) => ({ id: item.id, title: item.title }))}
+              selectedId={selectedSubGoalId}
+              emptyText={selectedMainGoal ? "No sub goals for this main goal yet." : "Choose a main goal first."}
+              onSelect={(id) => {
+                onSelectSubGoal(id);
+                onCloseSidebar();
+              }}
+              onBackToMain={() => {
+                onBackToMain();
+                onCloseSidebar();
+              }}
+            />
+          </div>
+        </>
+      ) : null}
+      <div className="flex-1 space-y-4 rounded-[32px] border border-panel bg-surface-card p-4 md:p-6">
+        <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-ink-strong">
           <ListTodo size={19} aria-hidden />
           <span>{subGoal ? `Tasks for ${subGoal.title}` : "Tasks"}</span>
         </h2>
-        {!subGoal ? <p className="text-sm text-[var(--ink-soft)]">Choose a Sub Goal in the sidebar.</p> : null}
-        {subGoal ? <TaskEditor submitLabel="Add task" onSubmit={(title) => onCreateTask(subGoal.id, title)} /> : null}
-        {error ? <p className="text-sm text-[#ba6461]">{error}</p> : null}
+        {!subGoal ? <p className="text-sm text-ink-soft">Choose a Sub Goal in the sidebar.</p> : null}
         {subGoal ? (
-          <div className="space-y-2 rounded-[24px] bg-[#e8e1db] px-4 py-3">
+          <TaskEditor
+            submitLabel="Add task"
+            disabled={isTaskLimitReached}
+            disabledMessage={taskLimitMessage}
+            onSubmit={async (title) => {
+              if (isTaskLimitReached) {
+                setError(taskLimitMessage);
+                return;
+              }
+              try {
+                await onCreateTask(subGoal.id, title);
+                setError(null);
+              } catch (err) {
+                setError(err instanceof Error ? err.message : "Failed to create task");
+              }
+            }}
+          />
+        ) : null}
+        {error ? <p className="text-sm text-error-strong">{error}</p> : null}
+        {subGoal ? (
+          <div className="space-y-2 rounded-[24px] bg-surface-list px-4 py-3">
+            {subGoal.tasks.length === 0 ? (
+              <p className="py-2 text-sm text-ink-soft">No tasks yet. Add one above to get started.</p>
+            ) : null}
             {subGoal.tasks.map((task) => (
               <TaskRow
                 key={task.id}

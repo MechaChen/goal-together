@@ -26,6 +26,7 @@ describe("dynamic route labels", () => {
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals for Main Goal 1" })).toBeTruthy());
     expect(window.location.hash).toBe("#/sub-goals/main-goal-1-g1");
 
+    await userEvent.click(screen.getByRole("button", { name: "Toggle sidebar" }));
     await userEvent.click(screen.getByRole("button", { name: "Back to Main Page" }));
     await waitFor(() => expect(screen.getByRole("heading", { name: "Main Goals" })).toBeTruthy());
   });

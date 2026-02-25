@@ -22,6 +22,7 @@ describe("sub goals context gating", () => {
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals" })).toBeTruthy());
     expect(screen.getByText(/Choose a Main Goal in the sidebar/)).toBeTruthy();
 
+    await userEvent.click(screen.getByRole("button", { name: "Toggle sidebar" }));
     await userEvent.click(screen.getByRole("button", { name: "Main Goal 1" }));
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals for Main Goal 1" })).toBeTruthy());

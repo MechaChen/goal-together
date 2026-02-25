@@ -14,8 +14,8 @@ const baseTask: TaskItem = {
   first_rewarded_completion_at: null,
 };
 
-describe("task row complete button state", () => {
-  it("keeps complete enabled for uncompleted confirmed task", async () => {
+describe("task row checkbox completion state", () => {
+  it("keeps checkbox enabled for uncompleted confirmed task", async () => {
     const onComplete = vi.fn().mockResolvedValue(undefined);
 
     render(
@@ -29,14 +29,14 @@ describe("task row complete button state", () => {
       />,
     );
 
-    const button = screen.getByRole("button", { name: "Complete" }) as HTMLButtonElement;
+    const button = screen.getByRole("button", { name: "Complete task Example task" }) as HTMLButtonElement;
     expect(button.disabled).toBe(false);
 
     await userEvent.click(button);
     expect(onComplete).toHaveBeenCalledWith("t1");
   });
 
-  it("disables complete for already completed confirmed task", async () => {
+  it("disables checkbox for already completed confirmed task", async () => {
     const onComplete = vi.fn().mockResolvedValue(undefined);
 
     render(
@@ -50,7 +50,7 @@ describe("task row complete button state", () => {
       />,
     );
 
-    const button = screen.getByRole("button", { name: "Completed" }) as HTMLButtonElement;
+    const button = screen.getByRole("button", { name: "Task Example task completed" }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     expect(screen.getByText("This task is already completed.")).toBeTruthy();
 

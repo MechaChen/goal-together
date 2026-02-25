@@ -1,4 +1,4 @@
-export type RewardModalType = "TASK_COMPLETE" | "MILESTONE_5X";
+export type RewardModalType = "TASK_COMPLETE" | "SUBGOAL_NEAR_COMPLETE" | "SUBGOAL_COMPLETE";
 
 export type RewardModalQueueItem = {
   queue_id: string;

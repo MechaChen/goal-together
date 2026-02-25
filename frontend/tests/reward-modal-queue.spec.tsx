@@ -7,8 +7,9 @@ import { installMockApi, type CompletionResponse } from "./mock-api";
 
 const first: CompletionResponse = {
   task_reward: 10,
-  milestone_reward: 0,
-  milestone_applied: false,
+  extra_reward: 0,
+  extra_reward_type: null,
+  extra_reward_message: null,
   rewarded_completion_count: 1,
   wallet_balance: 10,
   hint: null,
@@ -24,8 +25,9 @@ const first: CompletionResponse = {
 
 const second: CompletionResponse = {
   task_reward: 10,
-  milestone_reward: 50,
-  milestone_applied: true,
+  extra_reward: 30,
+  extra_reward_type: "SUBGOAL_NEAR_COMPLETE",
+  extra_reward_message: "Almost there! Enjoy a treat.",
   rewarded_completion_count: 5,
   wallet_balance: 60,
   hint: null,
@@ -55,8 +57,8 @@ describe("reward modal queue", () => {
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
 
-    await userEvent.click(screen.getByRole("button", { name: "Complete" }));
-    await userEvent.click(screen.getByRole("button", { name: "Complete" }));
+    await userEvent.click(screen.getByRole("button", { name: "Complete task Task 1" }));
+    await userEvent.click(screen.getByRole("button", { name: "Complete task Task 1" }));
 
     await waitFor(() => expect(screen.getByText("+10 tokens")).toBeTruthy());
     expect(screen.getByText('Completed task: "Task 1"')).toBeTruthy();
@@ -68,7 +70,7 @@ describe("reward modal queue", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 3200));
 
-    await waitFor(() => expect(screen.getByText("+50 tokens")).toBeTruthy());
-    expect(screen.getByText("Milestone reached: 5 rewarded tasks")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("+30 tokens")).toBeTruthy());
+    expect(screen.getByText("Almost there! Enjoy a treat.")).toBeTruthy();
   }, 13000);
 });

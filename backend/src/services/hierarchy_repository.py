@@ -1,14 +1,15 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.main_goal import MainGoal
 from src.models.sub_goal import SubGoal
 from src.models.task_item import TaskItem
-from src.services.service_errors import ConflictError, NotFoundError, ValidationError
+from src.services.service_errors import CapacityError, ConflictError, NotFoundError, ValidationError
 
 
 DRAFT = "draft"
 CONFIRMED = "confirmed"
+MAX_TASKS_PER_SUB_GOAL = 5
 
 
 def _normalize_title(value: str) -> str:
@@ -115,6 +116,11 @@ async def get_task(session: AsyncSession, task_id: str) -> TaskItem:
 
 async def create_draft_task(session: AsyncSession, sub_goal_id: str, title: str) -> TaskItem:
     await get_sub_goal(session, sub_goal_id)
+    task_count_result = await session.execute(
+        select(func.count()).select_from(TaskItem).where(TaskItem.sub_goal_id == sub_goal_id)
+    )
+    if int(task_count_result.scalar_one()) >= MAX_TASKS_PER_SUB_GOAL:
+        raise CapacityError(f"maximum of {MAX_TASKS_PER_SUB_GOAL} tasks reached for this sub goal")
     task = TaskItem(sub_goal_id=sub_goal_id, title=_normalize_title(title), lifecycle_state=DRAFT)
     session.add(task)
     await session.commit()

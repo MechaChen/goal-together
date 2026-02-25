@@ -83,8 +83,9 @@ export const rewardHierarchyApi = {
       if (error instanceof ApiError && error.message.includes("already completed previously")) {
         return {
           task_reward: 0,
-          milestone_reward: 0,
-          milestone_applied: false,
+          extra_reward: 0,
+          extra_reward_type: null,
+          extra_reward_message: null,
           rewarded_completion_count: 0,
           wallet_balance: 0,
           hint: "already completed previously",

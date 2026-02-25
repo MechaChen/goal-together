@@ -61,8 +61,8 @@ export function TokenHierarchyPage() {
         setCompletionHint(result.hint);
         return;
       }
-      const milestoneText = result.milestone_applied ? ` + milestone ${result.milestone_reward}` : "";
-      setRewardMessage(`Reward granted: +${result.task_reward}${milestoneText} tokens`);
+      const extraText = result.extra_reward > 0 ? ` + bonus ${result.extra_reward}` : "";
+      setRewardMessage(`Reward granted: +${result.task_reward}${extraText} tokens`);
       await refresh();
     } catch (err) {
       if (err instanceof ApiError && err.message.includes("already completed previously")) {

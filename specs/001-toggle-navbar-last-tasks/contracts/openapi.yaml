@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: Goal Together Client Navigation Contract
+  version: 1.0.0
+  description: >
+    Contract-first definition for client-side navigation behavior introduced by
+    feature 001-toggle-navbar-last-tasks. Backend API endpoints remain unchanged.
+servers:
+  - url: https://client.local
+    description: In-app client state boundary (non-network)
+paths:
+  /client/navigation/visibility:
+    get:
+      summary: Read current in-session navigation visibility
+      operationId: getNavigationVisibility
+      responses:
+        "200":
+          description: Navigation visibility state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationVisibility"
+    post:
+      summary: Toggle navigation visibility for current session
+      operationId: toggleNavigationVisibility
+      responses:
+        "200":
+          description: Updated navigation visibility state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationVisibility"
+  /client/navigation/last-opened-tasks:
+    get:
+      summary: Read persisted last-opened tasks context
+      operationId: getLastOpenedTasks
+      description: Context is only applied when app entry route is root/home.
+      responses:
+        "200":
+          description: Persisted context if present and valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LastOpenedTasksContext"
+        "204":
+          description: No valid saved context
+    put:
+      summary: Save/update last-opened tasks context
+      operationId: putLastOpenedTasks
+      description: Stores only tasks-route contexts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LastOpenedTasksContext"
+      responses:
+        "204":
+          description: Saved successfully
+    delete:
+      summary: Clear invalid or obsolete saved context
+      operationId: deleteLastOpenedTasks
+      responses:
+        "204":
+          description: Cleared successfully
+components:
+  schemas:
+    NavigationVisibility:
+      type: object
+      required:
+        - is_nav_visible
+      properties:
+        is_nav_visible:
+          type: boolean
+          description: Current in-session visibility of the primary navigation.
+    LastOpenedTasksContext:
+      type: object
+      required:
+        - route
+        - saved_at
+        - schema_version
+      properties:
+        route:
+          type: string
+          minLength: 1
+          description: Last opened tasks route path/hash.
+        main_segment:
+          type: string
+          nullable: true
+        sub_segment:
+          type: string
+          nullable: true
+        saved_at:
+          type: string
+          format: date-time
+        schema_version:
+          type: integer
+          minimum: 1

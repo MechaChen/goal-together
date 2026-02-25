@@ -1,16 +1,18 @@
 import datetime as dt
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.reward_event import RewardEvent
 from src.models.task_item import TaskItem
 from src.models.token_wallet import TokenWallet
-from src.services.reward_milestone_service import MILESTONE_REWARD, should_grant_milestone
 from src.services.service_errors import ConflictError
 
 DEFAULT_USER_ID = "default-user"
 TASK_REWARD = 10
+SUBGOAL_NEAR_COMPLETE_THRESHOLD = 0.6
+SUBGOAL_NEAR_COMPLETE_REWARD = 30
+SUBGOAL_COMPLETE_REWARD = 50
 
 
 async def _get_or_create_wallet(session: AsyncSession, user_id: str = DEFAULT_USER_ID) -> TokenWallet:
@@ -59,20 +61,48 @@ async def grant_completion_reward(session: AsyncSession, task: TaskItem, user_id
     )
     session.add(completion_event)
 
-    milestone_event = None
-    if should_grant_milestone(wallet.rewarded_completion_count):
-        milestone_key = f"MILESTONE_5X:{wallet.rewarded_completion_count}"
-        if not await _event_exists(session, milestone_key):
-            wallet.balance += MILESTONE_REWARD
-            milestone_event = RewardEvent(
-                user_id=user_id,
-                task_id=task.id,
-                event_type="MILESTONE_5X",
-                token_amount=MILESTONE_REWARD,
-                rewarded_completion_counter=wallet.rewarded_completion_count,
-                idempotency_key=milestone_key,
-            )
-            session.add(milestone_event)
+    await session.flush()
+    total_tasks_result = await session.execute(
+        select(func.count()).select_from(TaskItem).where(TaskItem.sub_goal_id == task.sub_goal_id)
+    )
+    completed_tasks_result = await session.execute(
+        select(func.count()).select_from(TaskItem).where(
+            TaskItem.sub_goal_id == task.sub_goal_id,
+            TaskItem.is_completed.is_(True),
+        )
+    )
+    total_tasks = int(total_tasks_result.scalar_one())
+    completed_tasks = int(completed_tasks_result.scalar_one())
+    progress = (completed_tasks / total_tasks) if total_tasks > 0 else 0.0
+
+    extra_reward = 0
+    extra_reward_type: str | None = None
+    extra_reward_message: str | None = None
+
+    if progress >= 1.0:
+        bonus_key = f"SUBGOAL_COMPLETE:{task.sub_goal_id}"
+        if not await _event_exists(session, bonus_key):
+            extra_reward = SUBGOAL_COMPLETE_REWARD
+            extra_reward_type = "SUBGOAL_COMPLETE"
+            extra_reward_message = "You Snailed it! Awesome job"
+    elif progress >= SUBGOAL_NEAR_COMPLETE_THRESHOLD:
+        bonus_key = f"SUBGOAL_NEAR_COMPLETE:{task.sub_goal_id}"
+        if not await _event_exists(session, bonus_key):
+            extra_reward = SUBGOAL_NEAR_COMPLETE_REWARD
+            extra_reward_type = "SUBGOAL_NEAR_COMPLETE"
+            extra_reward_message = "Almost there! Enjoy a treat."
+
+    if extra_reward_type and extra_reward > 0:
+        wallet.balance += extra_reward
+        bonus_event = RewardEvent(
+            user_id=user_id,
+            task_id=task.id,
+            event_type=extra_reward_type,
+            token_amount=extra_reward,
+            rewarded_completion_counter=wallet.rewarded_completion_count,
+            idempotency_key=f"{extra_reward_type}:{task.sub_goal_id}",
+        )
+        session.add(bonus_event)
 
     await session.commit()
     await session.refresh(wallet)
@@ -80,8 +110,9 @@ async def grant_completion_reward(session: AsyncSession, task: TaskItem, user_id
 
     return {
         "task_reward": TASK_REWARD,
-        "milestone_reward": MILESTONE_REWARD if milestone_event else 0,
-        "milestone_applied": milestone_event is not None,
+        "extra_reward": extra_reward,
+        "extra_reward_type": extra_reward_type,
+        "extra_reward_message": extra_reward_message,
         "rewarded_completion_count": wallet.rewarded_completion_count,
         "wallet_balance": wallet.balance,
         "task": task,

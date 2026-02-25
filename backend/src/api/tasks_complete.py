@@ -14,8 +14,9 @@ async def post_task_complete(task_id: str, session: AsyncSession = Depends(get_d
     task = result["task"]
     return {
         "task_reward": result["task_reward"],
-        "milestone_reward": result["milestone_reward"],
-        "milestone_applied": result["milestone_applied"],
+        "extra_reward": result["extra_reward"],
+        "extra_reward_type": result["extra_reward_type"],
+        "extra_reward_message": result["extra_reward_message"],
         "rewarded_completion_count": result["rewarded_completion_count"],
         "wallet_balance": result["wallet_balance"],
         "hint": None,

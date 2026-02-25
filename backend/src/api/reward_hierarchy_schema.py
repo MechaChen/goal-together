@@ -50,8 +50,9 @@ class TaskResponse(BaseModel):
 
 class CompleteTaskResponse(BaseModel):
     task_reward: int
-    milestone_reward: int
-    milestone_applied: bool
+    extra_reward: int
+    extra_reward_type: str | None = None
+    extra_reward_message: str | None = None
     rewarded_completion_count: int
     wallet_balance: int
     hint: str | None = None
