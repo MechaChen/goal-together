@@ -22,7 +22,9 @@ def _normalize_title(value: str) -> str:
 
 
 async def list_main_goals(session: AsyncSession) -> list[MainGoal]:
-    result = await session.execute(select(MainGoal).order_by(MainGoal.created_at.asc()))
+    result = await session.execute(
+        select(MainGoal).order_by(MainGoal.is_completed.asc(), MainGoal.created_at.asc())
+    )
     return list(result.scalars().all())
 
 
@@ -74,7 +76,9 @@ async def delete_main_goal(session: AsyncSession, main_goal_id: str) -> None:
 async def list_sub_goals(session: AsyncSession, main_goal_id: str) -> list[SubGoal]:
     await get_main_goal(session, main_goal_id)
     result = await session.execute(
-        select(SubGoal).where(SubGoal.main_goal_id == main_goal_id).order_by(SubGoal.created_at.asc())
+        select(SubGoal)
+        .where(SubGoal.main_goal_id == main_goal_id)
+        .order_by(SubGoal.is_completed.asc(), SubGoal.created_at.asc())
     )
     return list(result.scalars().all())
 
@@ -118,7 +122,11 @@ async def delete_sub_goal(session: AsyncSession, sub_goal_id: str) -> None:
 
 async def list_tasks(session: AsyncSession, sub_goal_id: str) -> list[TaskItem]:
     await get_sub_goal(session, sub_goal_id)
-    result = await session.execute(select(TaskItem).where(TaskItem.sub_goal_id == sub_goal_id).order_by(TaskItem.created_at.asc()))
+    result = await session.execute(
+        select(TaskItem)
+        .where(TaskItem.sub_goal_id == sub_goal_id)
+        .order_by(TaskItem.is_completed.asc(), TaskItem.created_at.asc())
+    )
     return list(result.scalars().all())
 
 
@@ -190,8 +198,12 @@ async def delete_draft_task(session: AsyncSession, task_id: str) -> None:
 
 async def get_hierarchy_tree(session: AsyncSession) -> list[dict[str, object]]:
     goals = await list_main_goals(session)
-    sub_goal_rows = await session.execute(select(SubGoal).order_by(SubGoal.created_at.asc()))
-    task_rows = await session.execute(select(TaskItem).order_by(TaskItem.created_at.asc()))
+    sub_goal_rows = await session.execute(
+        select(SubGoal).order_by(SubGoal.main_goal_id.asc(), SubGoal.is_completed.asc(), SubGoal.created_at.asc())
+    )
+    task_rows = await session.execute(
+        select(TaskItem).order_by(TaskItem.sub_goal_id.asc(), TaskItem.is_completed.asc(), TaskItem.created_at.asc())
+    )
 
     sub_goals = list(sub_goal_rows.scalars().all())
     tasks = list(task_rows.scalars().all())
