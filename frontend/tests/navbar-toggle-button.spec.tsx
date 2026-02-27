@@ -13,7 +13,7 @@ afterEach(() => {
 
 describe("navbar toggle button", () => {
   it("opens and closes sidebar from header left button", async () => {
-    restore = renderAppAt("#/sub-goals").restore;
+    restore = renderAppAt("/sub-goals").restore;
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals" })).toBeTruthy());
 
     const button = screen.getByRole("button", { name: "Toggle sidebar" });

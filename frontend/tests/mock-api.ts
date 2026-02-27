@@ -53,6 +53,7 @@ export function installMockApi(options?: {
   tree?: MainGoalItem[];
   completions?: CompletionResponse[];
   history?: RewardEvent[];
+  confirmDraftDelayMs?: number;
 }) {
   const tree = options?.tree ?? createMockTree();
   const completionQueue = [...(options?.completions ?? [])];
@@ -228,6 +229,9 @@ export function installMockApi(options?: {
 
     if (url.includes("/sub-goals/") && url.endsWith("/tasks/confirm-drafts") && method === "POST") {
       const subGoalId = url.split("/sub-goals/")[1].split("/")[0];
+      if (options?.confirmDraftDelayMs && options.confirmDraftDelayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, options.confirmDraftDelayMs));
+      }
       for (const goal of tree) {
         const subGoal = goal.sub_goals.find((item) => item.id === subGoalId);
         if (!subGoal) {
@@ -259,6 +263,9 @@ export function installMockApi(options?: {
       for (const goal of tree) {
         const subGoal = goal.sub_goals.find((item) => item.id === subGoalId);
         if (subGoal) {
+          if (subGoal.is_completed) {
+            return respond(409, { message: "completed sub goal cannot add tasks", code: "CONFLICT_ERROR" });
+          }
           const task = {
             id: `t${subGoal.tasks.length + 1}-${subGoal.id}`,
             sub_goal_id: subGoal.id,
@@ -295,6 +302,12 @@ export function installMockApi(options?: {
           const task = subGoal.tasks.find((item) => item.id === taskId);
           if (task) {
             task.is_completed = true;
+            const totalTasks = subGoal.tasks.length;
+            const completedTasks = subGoal.tasks.filter((entry) => entry.is_completed).length;
+            if (totalTasks > 0 && completedTasks === totalTasks) {
+              subGoal.is_completed = true;
+              subGoal.completed_at = new Date().toISOString();
+            }
             break;
           }
         }

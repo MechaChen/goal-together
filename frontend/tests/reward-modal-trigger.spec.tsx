@@ -33,7 +33,7 @@ afterEach(() => {
 describe("reward modal trigger", () => {
   it("shows modal after rewarded completion", async () => {
     restore = installMockApi({ completions: [success] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 

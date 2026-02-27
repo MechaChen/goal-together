@@ -20,9 +20,9 @@ export function clearLaunchState() {
   window.localStorage.removeItem(NAVIGATION_LAUNCH_STORAGE_KEY);
 }
 
-export function renderAppAt(hash: string, options?: MockOptions) {
+export function renderAppAt(pathname: string, options?: MockOptions) {
   const { restore } = installMockApi(options);
-  window.location.hash = hash;
+  window.history.replaceState({}, "", pathname);
   const renderResult = render(React.createElement(App));
   return {
     restore,

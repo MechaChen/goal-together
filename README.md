@@ -2,14 +2,27 @@
 
 ## Todos
 
+### Unexpected to fix
+
 - [x] coin style is not good looking, modify it
 - [x] sidebar should be togglable
 - [x] main page should be the last ongoing tasks list
+- [x] all draft tasks should be confirm all tasks at once
+- [x] when all tasks of any sub goal are completed, the subgoal should be checked
+- [x] subtask completion won't give new reward, since tasks cannot be changed, but main goal completion still does
+- [x] when tasks are confirmed, the +Add task button should be disabled
+
+### New ideas
+
 - [] if the subgoal is done, switch to next subgoal
 - [] add voice effect when getting token
 - [] AI feature - suggest a strong sense of achievement with little effort
-- [] all draft tasks should be confirm all tasks at once
-- [] when all tasks of any sub goal are completed, the subgoal should be checked
+- [] AI feature - Retro system
+
+### Development Enhancement
+
+- [] Try to figure out the way to add LSP server
+- [] Try to add guide for unit testing
 
 ## Prerequisites
 

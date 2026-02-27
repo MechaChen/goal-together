@@ -87,6 +87,10 @@ async def grant_completion_reward(session: AsyncSession, task: TaskItem, user_id
     total_tasks = int(total_tasks_result.scalar_one())
     completed_tasks = int(completed_tasks_result.scalar_one())
     progress = (completed_tasks / total_tasks) if total_tasks > 0 else 0.0
+    sub_goal = await session.get(SubGoal, task.sub_goal_id)
+    if sub_goal and progress >= 1.0 and not sub_goal.is_completed:
+        sub_goal.is_completed = True
+        sub_goal.completed_at = now
 
     extra_reward = 0
     extra_reward_type: str | None = None

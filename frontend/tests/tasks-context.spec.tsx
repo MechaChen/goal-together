@@ -15,7 +15,7 @@ afterEach(() => {
 describe("tasks context gating", () => {
   it("opens tasks from selected sub goal", async () => {
     restore = installMockApi().restore;
-    window.location.hash = "#/main-goals";
+    window.history.replaceState({}, "", "/main-goals");
 
     render(<App />);
 

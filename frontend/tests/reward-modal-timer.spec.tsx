@@ -33,7 +33,7 @@ afterEach(() => {
 describe("reward modal timer", () => {
   it("auto dismisses modal after 3 seconds", async () => {
     restore = installMockApi({ completions: [reward] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 

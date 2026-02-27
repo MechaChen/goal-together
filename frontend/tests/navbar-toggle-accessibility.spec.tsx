@@ -13,7 +13,7 @@ afterEach(() => {
 
 describe("navbar toggle accessibility", () => {
   it("exposes accessible expanded state changes", async () => {
-    restore = renderAppAt("#/sub-goals").restore;
+    restore = renderAppAt("/sub-goals").restore;
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals" })).toBeTruthy());
 
     const toggle = screen.getByRole("button", { name: "Toggle sidebar" });

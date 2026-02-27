@@ -25,7 +25,7 @@ describe("reward history populated state", () => {
         },
       ],
     }).restore;
-    window.location.hash = "#/reward-history";
+    window.history.replaceState({}, "", "/reward-history");
 
     render(<App />);
 

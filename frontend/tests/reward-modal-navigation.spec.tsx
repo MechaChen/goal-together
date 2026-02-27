@@ -33,7 +33,7 @@ afterEach(() => {
 describe("reward modal navigation persistence", () => {
   it("keeps active modal visible across page navigation", async () => {
     restore = installMockApi({ completions: [reward] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 
@@ -41,7 +41,7 @@ describe("reward modal navigation persistence", () => {
     await userEvent.click(screen.getByRole("button", { name: "Complete task Task 1" }));
 
     await waitFor(() => expect(screen.getByTestId("reward-modal")).toBeTruthy());
-    window.location.hash = "#/reward-history";
+    window.history.replaceState({}, "", "/reward-history");
 
     expect(screen.getByTestId("reward-modal")).toBeTruthy();
   });

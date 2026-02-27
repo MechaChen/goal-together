@@ -48,7 +48,7 @@ async def test_complete_sub_goal_requires_all_tasks_completed() -> None:
 
 
 @pytest.mark.asyncio
-async def test_complete_sub_goal_grants_200_tokens() -> None:
+async def test_manual_complete_sub_goal_conflicts_after_auto_completion() -> None:
     async with new_session() as session:
         main_goal = await create_main_goal(session, "Main Goal")
         sub_goal = await create_sub_goal(session, main_goal.id, "Sub Goal")
@@ -56,12 +56,8 @@ async def test_complete_sub_goal_grants_200_tokens() -> None:
         await confirm_task(session, task.id)
         await complete_task(session, task.id)
 
-        result = await complete_sub_goal(session, sub_goal.id)
-
-        assert result["reward_granted"] is True
-        assert result["reward_amount"] == 200
-        assert result["is_completed"] is True
-        assert result["progress"] == {"completed_count": 1, "total_count": 1, "percentage": 100}
+        with pytest.raises(ConflictError, match="sub goal already completed previously"):
+            await complete_sub_goal(session, sub_goal.id)
 
 
 @pytest.mark.asyncio
@@ -73,7 +69,6 @@ async def test_complete_main_goal_requires_all_sub_goals_completed() -> None:
         first_task = await create_draft_task(session, first_sub_goal.id, "Task 1")
         await confirm_task(session, first_task.id)
         await complete_task(session, first_task.id)
-        await complete_sub_goal(session, first_sub_goal.id)
 
         with pytest.raises(ConflictError, match=r"cannot complete main goal yet: 50% \(1/2\) sub goals completed"):
             await complete_main_goal(session, main_goal.id)
@@ -91,8 +86,6 @@ async def test_complete_main_goal_grants_500_tokens() -> None:
         await confirm_task(session, second_task.id)
         await complete_task(session, first_task.id)
         await complete_task(session, second_task.id)
-        await complete_sub_goal(session, first_sub_goal.id)
-        await complete_sub_goal(session, second_sub_goal.id)
 
         result = await complete_main_goal(session, main_goal.id)
 
@@ -100,3 +93,16 @@ async def test_complete_main_goal_grants_500_tokens() -> None:
         assert result["reward_amount"] == 500
         assert result["is_completed"] is True
         assert result["progress"] == {"completed_count": 2, "total_count": 2, "percentage": 100}
+
+
+@pytest.mark.asyncio
+async def test_create_task_fails_when_sub_goal_is_auto_completed() -> None:
+    async with new_session() as session:
+        main_goal = await create_main_goal(session, "Main Goal")
+        sub_goal = await create_sub_goal(session, main_goal.id, "Sub Goal")
+        task = await create_draft_task(session, sub_goal.id, "Task 1")
+        await confirm_task(session, task.id)
+        await complete_task(session, task.id)
+
+        with pytest.raises(ConflictError, match="completed sub goal cannot add tasks"):
+            await create_draft_task(session, sub_goal.id, "Task 2")

@@ -123,7 +123,11 @@ export function SubGoalsPage({
           >
             <HierarchySidebar
               title="Main Goals"
-              items={items.map((goal) => ({ id: goal.id, title: goal.title }))}
+              items={items.map((goal) => ({
+                id: goal.id,
+                title: goal.title,
+                isCompleted: goal.is_completed,
+              }))}
               selectedId={selectedMainGoalId}
               emptyText="No main goals yet."
               onSelect={(id) => {

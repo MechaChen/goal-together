@@ -53,15 +53,17 @@ function createTreeWithDraftTasks(): MainGoalItem[] {
 }
 
 describe("tasks bulk confirm", () => {
-  it("confirms all draft tasks at once and shows success toast", async () => {
-    restore = installMockApi({ tree: createTreeWithDraftTasks() }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+  it("keeps Confirm Draft Tasks during request and switches to Fighting after drafts are confirmed", async () => {
+    restore = installMockApi({ tree: createTreeWithDraftTasks(), confirmDraftDelayMs: 60 }).restore;
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
     await userEvent.click(screen.getByRole("button", { name: "Confirm Draft Tasks" }));
+    expect(screen.getByRole("button", { name: "Confirm Draft Tasks" })).toBeTruthy();
 
     await waitFor(() => expect(screen.getByText("Confirmed 2 draft task(s).")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Fighting" })).toBeTruthy());
   });
 });

@@ -15,7 +15,7 @@ afterEach(() => {
 describe("sub goals context gating", () => {
   it("requires main goal context", async () => {
     restore = installMockApi().restore;
-    window.location.hash = "#/sub-goals";
+    window.history.replaceState({}, "", "/sub-goals");
 
     render(<App />);
 

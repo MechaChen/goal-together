@@ -138,7 +138,9 @@ async def get_task(session: AsyncSession, task_id: str) -> TaskItem:
 
 
 async def create_draft_task(session: AsyncSession, sub_goal_id: str, title: str) -> TaskItem:
-    await get_sub_goal(session, sub_goal_id)
+    sub_goal = await get_sub_goal(session, sub_goal_id)
+    if sub_goal.is_completed:
+        raise ConflictError("completed sub goal cannot add tasks")
     task_count_result = await session.execute(
         select(func.count()).select_from(TaskItem).where(TaskItem.sub_goal_id == sub_goal_id)
     )

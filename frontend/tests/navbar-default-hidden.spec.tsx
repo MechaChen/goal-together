@@ -12,7 +12,7 @@ afterEach(() => {
 
 describe("navbar default hidden", () => {
   it("hides sidebar panel on first render", async () => {
-    restore = renderAppAt("#/sub-goals").restore;
+    restore = renderAppAt("/sub-goals").restore;
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals" })).toBeTruthy());
     expect(screen.queryByText("Back to Main Page")).toBeNull();
   });

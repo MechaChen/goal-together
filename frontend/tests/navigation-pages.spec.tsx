@@ -15,7 +15,7 @@ afterEach(() => {
 describe("navigation pages", () => {
   it("renders dedicated pages through navigation", async () => {
     restore = installMockApi().restore;
-    window.location.hash = "#/main-goals";
+    window.history.replaceState({}, "", "/main-goals");
 
     render(<App />);
 
@@ -24,10 +24,12 @@ describe("navigation pages", () => {
     await waitFor(() => expect(screen.getByText("No reward events yet.")).toBeTruthy());
     await userEvent.click(screen.getByRole("button", { name: "Back to Main Page" }));
 
-    window.location.hash = "#/sub-goals";
-    await waitFor(() => expect(screen.getByRole("heading", { name: "Sub Goals" })).toBeTruthy());
+    await userEvent.click(screen.getByRole("button", { name: /^Main Goal 1/ }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Sub Goals for Main Goal 1" })).toBeTruthy()
+    );
 
-    window.location.hash = "#/tasks";
-    await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks" })).toBeTruthy());
+    await userEvent.click(screen.getByRole("button", { name: /^Sub Goal 1/ }));
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
   });
 });

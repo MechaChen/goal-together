@@ -91,7 +91,7 @@ afterEach(() => {
 describe("reward modal queue", () => {
   it("shows queued rewards in FIFO order", async () => {
     restore = installMockApi({ tree: createTreeWithTwoConfirmedTasks(), completions: [first, second] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 

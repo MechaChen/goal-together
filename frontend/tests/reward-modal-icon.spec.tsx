@@ -71,7 +71,7 @@ afterEach(() => {
 describe("reward modal icon", () => {
   it("renders token icon inside modal", async () => {
     restore = installMockApi({ completions: [reward] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 
@@ -83,7 +83,7 @@ describe("reward modal icon", () => {
 
   it("renders fighting logo for near-complete bonus", async () => {
     restore = installMockApi({ completions: [nearCompleteReward] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 
@@ -97,7 +97,7 @@ describe("reward modal icon", () => {
 
   it("renders congratulation logo for complete bonus", async () => {
     restore = installMockApi({ completions: [subGoalCompleteReward] }).restore;
-    window.location.hash = "#/tasks/main-goal-1-g1/sub-goal-1-s1";
+    window.history.replaceState({}, "", "/tasks/main-goal-1-g1/sub-goal-1-s1");
 
     render(<App />);
 

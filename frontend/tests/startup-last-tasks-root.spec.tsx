@@ -20,7 +20,7 @@ describe("startup last tasks root", () => {
       schema_version: 1,
     });
 
-    restore = renderAppAt("#/").restore;
+    restore = renderAppAt("/").restore;
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks for Sub Goal 1" })).toBeTruthy());
   });

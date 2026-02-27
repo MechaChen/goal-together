@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -53,5 +54,17 @@ async def test_subgoal_rewards_grant_30_at_60_to_99_and_50_at_100() -> None:
         assert fourth["extra_reward"] == 50
         assert fourth["extra_reward_type"] == "SUBGOAL_COMPLETE"
         assert fourth["extra_reward_message"] == "You Snailed it! Awesome job"
+
+        refreshed_sub_goal = await session.get(SubGoal, sub_goal.id)
+        assert refreshed_sub_goal is not None
+        assert refreshed_sub_goal.is_completed is True
+        assert refreshed_sub_goal.completed_at is not None
+
+        reward_events = (
+            await session.execute(
+                select(RewardEvent).where(RewardEvent.event_type == "SUBGOAL_MANUAL_COMPLETE")
+            )
+        ).scalars().all()
+        assert len(reward_events) == 0
 
     await engine.dispose()

@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { HashRouter, Navigate, Route, Routes, matchPath, useLocation, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  matchPath,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import { AppShell } from "./components/layout/app-shell";
 import { MainGoalsPage } from "./pages/main-goals-page";
@@ -14,8 +22,16 @@ import {
 import { toNameIdSegment } from "./services/route-segment";
 import { rewardHierarchyApi } from "./services/reward-hierarchy.client";
 import { loadRewardHistoryPageData } from "./services/reward-history-page.service";
-import type { AppToast, AppToastKind, MainGoalItem, RewardEvent } from "./services/reward-hierarchy.types";
-import { enqueueRewardModal, enqueueRewardModals } from "./services/reward-modal-queue.service";
+import type {
+  AppToast,
+  AppToastKind,
+  MainGoalItem,
+  RewardEvent,
+} from "./services/reward-hierarchy.types";
+import {
+  enqueueRewardModal,
+  enqueueRewardModals,
+} from "./services/reward-modal-queue.service";
 import { resolveLaunchPath } from "./services/navigation-launch.resolver";
 import {
   clearLastOpenedTasksContext,
@@ -56,11 +72,23 @@ function AppInner() {
   const location = useLocation();
 
   const subGoalsMatch = matchPath("/sub-goals/:mainSegment", location.pathname);
-  const tasksMatch = matchPath("/tasks/:mainSegment/:subSegment", location.pathname);
-  const tasksMainOnlyMatch = matchPath("/tasks/:mainSegment", location.pathname);
-  const hasSidebar = location.pathname.startsWith("/sub-goals") || location.pathname.startsWith("/tasks");
+  const tasksMatch = matchPath(
+    "/tasks/:mainSegment/:subSegment",
+    location.pathname,
+  );
+  const tasksMainOnlyMatch = matchPath(
+    "/tasks/:mainSegment",
+    location.pathname,
+  );
+  const hasSidebar =
+    location.pathname.startsWith("/sub-goals") ||
+    location.pathname.startsWith("/tasks");
 
-  const mainSegment = tasksMatch?.params.mainSegment ?? tasksMainOnlyMatch?.params.mainSegment ?? subGoalsMatch?.params.mainSegment ?? null;
+  const mainSegment =
+    tasksMatch?.params.mainSegment ??
+    tasksMainOnlyMatch?.params.mainSegment ??
+    subGoalsMatch?.params.mainSegment ??
+    null;
   const subSegment = tasksMatch?.params.subSegment ?? null;
 
   function notify(kind: AppToastKind, message: string) {
@@ -83,9 +111,13 @@ function AppInner() {
   }
 
   useEffect(() => {
-    void refreshData().catch((err) => {
-      setError(err instanceof Error ? err.message : "Failed to load app data");
-    }).finally(() => setDataReady(true));
+    void refreshData()
+      .catch((err) => {
+        setError(
+          err instanceof Error ? err.message : "Failed to load app data",
+        );
+      })
+      .finally(() => setDataReady(true));
   }, []);
 
   useEffect(() => {
@@ -101,14 +133,21 @@ function AppInner() {
   }, [hasSidebar, isSidebarOpen]);
 
   const selectedMainGoal = useMemo(
-    () => items.find((goal) => mainSegment !== null && toNameIdSegment(goal.title, goal.id) === mainSegment) ?? null,
+    () =>
+      items.find(
+        (goal) =>
+          mainSegment !== null &&
+          toNameIdSegment(goal.title, goal.id) === mainSegment,
+      ) ?? null,
     [items, mainSegment],
   );
 
   const selectedSubGoal = useMemo(
     () =>
       selectedMainGoal?.sub_goals.find(
-        (subGoal) => subSegment !== null && toNameIdSegment(subGoal.title, subGoal.id) === subSegment,
+        (subGoal) =>
+          subSegment !== null &&
+          toNameIdSegment(subGoal.title, subGoal.id) === subSegment,
       ) ?? null,
     [selectedMainGoal, subSegment],
   );
@@ -174,9 +213,13 @@ function AppInner() {
           navigate("/tasks");
           return;
         }
-        const subGoal = selectedMainGoal.sub_goals.find((item) => item.id === id);
+        const subGoal = selectedMainGoal.sub_goals.find(
+          (item) => item.id === id,
+        );
         if (!subGoal) {
-          navigate(`/tasks/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`);
+          navigate(
+            `/tasks/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`,
+          );
           return;
         }
         navigate(
@@ -186,7 +229,15 @@ function AppInner() {
           )}`,
         );
       }}
-      onBackToMain={() => navigate("/main-goals")}
+      onBackToMain={() => {
+        if (selectedMainGoal) {
+          navigate(
+            `/main-goals/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`,
+          );
+          return;
+        }
+        navigate("/main-goals");
+      }}
       isSidebarOpen={hasSidebar && isSidebarOpen}
       onCloseSidebar={() => setIsSidebarOpen(false)}
       onCreateSubGoal={async (mainGoalId, title) => {
@@ -210,7 +261,9 @@ function AppInner() {
           await rewardHierarchyApi.deleteSubGoal(subGoalId);
           await refreshData();
           if (selectedMainGoal) {
-            navigate(`/sub-goals/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`);
+            navigate(
+              `/sub-goals/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`,
+            );
           } else {
             navigate("/sub-goals");
           }
@@ -233,9 +286,13 @@ function AppInner() {
           navigate("/tasks");
           return;
         }
-        const subGoal = selectedMainGoal.sub_goals.find((item) => item.id === id);
+        const subGoal = selectedMainGoal.sub_goals.find(
+          (item) => item.id === id,
+        );
         if (!subGoal) {
-          navigate(`/tasks/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`);
+          navigate(
+            `/tasks/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`,
+          );
           return;
         }
         navigate(
@@ -245,7 +302,15 @@ function AppInner() {
           )}`,
         );
       }}
-      onBackToMain={() => navigate("/main-goals")}
+      onBackToMain={() => {
+        if (selectedMainGoal) {
+          navigate(
+            `/sub-goals/${toNameIdSegment(selectedMainGoal.title, selectedMainGoal.id)}`,
+          );
+          return;
+        }
+        navigate("/sub-goals");
+      }}
       isSidebarOpen={hasSidebar && isSidebarOpen}
       onCloseSidebar={() => setIsSidebarOpen(false)}
       onCreateTask={async (subGoalId, title) => {
@@ -292,16 +357,37 @@ function AppInner() {
         setIsSidebarOpen((value) => !value);
       }}
     >
-      {error ? <p className="rounded bg-red-100 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+      {error ? (
+        <p className="rounded bg-red-100 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
       <Routes>
-        <Route path="/" element={dataReady ? <RootEntryRedirect items={items} /> : <p className="text-sm text-ink-soft">Loading...</p>} />
+        <Route
+          path="/"
+          element={
+            dataReady ? (
+              <RootEntryRedirect items={items} />
+            ) : (
+              <p className="text-sm text-ink-soft">Loading...</p>
+            )
+          }
+        />
         <Route path="/main-goals" element={mainGoalsElement} />
         <Route path="/sub-goals" element={subGoalsElement} />
         <Route path="/sub-goals/:mainSegment" element={subGoalsElement} />
         <Route path="/tasks" element={tasksElement} />
         <Route path="/tasks/:mainSegment" element={tasksElement} />
         <Route path="/tasks/:mainSegment/:subSegment" element={tasksElement} />
-        <Route path="/reward-history" element={<RewardHistoryPage items={historyItems} onBackToMain={() => navigate("/main-goals")} />} />
+        <Route
+          path="/reward-history"
+          element={
+            <RewardHistoryPage
+              items={historyItems}
+              onBackToMain={() => navigate("/main-goals")}
+            />
+          }
+        />
         <Route path="*" element={<Navigate to="/main-goals" replace />} />
       </Routes>
     </AppShell>
@@ -310,8 +396,8 @@ function AppInner() {
 
 export function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <AppInner />
-    </HashRouter>
+    </BrowserRouter>
   );
 }

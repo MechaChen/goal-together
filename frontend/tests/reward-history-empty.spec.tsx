@@ -14,7 +14,7 @@ afterEach(() => {
 describe("reward history empty state", () => {
   it("shows explicit empty state", async () => {
     restore = installMockApi({ history: [] }).restore;
-    window.location.hash = "#/reward-history";
+    window.history.replaceState({}, "", "/reward-history");
 
     render(<App />);
 

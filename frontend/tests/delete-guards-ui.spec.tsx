@@ -17,7 +17,7 @@ describe("delete guards in UI", () => {
   it("shows conflict toast when deleting main goal with confirmed tasks", async () => {
     restore = installMockApi().restore;
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    window.location.hash = "#/main-goals";
+    window.history.replaceState({}, "", "/main-goals");
 
     render(<App />);
 
@@ -31,7 +31,7 @@ describe("delete guards in UI", () => {
   it("shows conflict toast when deleting sub goal with confirmed tasks", async () => {
     restore = installMockApi().restore;
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    window.location.hash = "#/sub-goals/main-goal-1-g1";
+    window.history.replaceState({}, "", "/sub-goals/main-goal-1-g1");
 
     render(<App />);
 

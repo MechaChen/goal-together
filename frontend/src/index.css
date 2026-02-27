@@ -74,6 +74,10 @@ button {
   font-family: var(--font-sans);
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 input,
 textarea,
 select {

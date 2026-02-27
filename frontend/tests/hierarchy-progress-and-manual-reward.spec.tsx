@@ -143,7 +143,7 @@ function createMainGoalCompleteTree(): MainGoalItem[] {
 describe("hierarchy row progress and manual completion reward modal", () => {
   it("shows main goal and sub goal progress digits", async () => {
     restore = installMockApi({ tree: createProgressTree() }).restore;
-    window.location.hash = "#/main-goals";
+    window.history.replaceState({}, "", "/main-goals");
 
     render(<App />);
 
@@ -159,7 +159,7 @@ describe("hierarchy row progress and manual completion reward modal", () => {
 
   it("shows reward modal after sub goal manual completion", async () => {
     restore = installMockApi({ tree: createSubGoalCompleteTree() }).restore;
-    window.location.hash = "#/sub-goals/main-goal-1-g1";
+    window.history.replaceState({}, "", "/sub-goals/main-goal-1-g1");
 
     render(<App />);
 
@@ -174,7 +174,7 @@ describe("hierarchy row progress and manual completion reward modal", () => {
 
   it("shows reward modal after main goal manual completion", async () => {
     restore = installMockApi({ tree: createMainGoalCompleteTree() }).restore;
-    window.location.hash = "#/main-goals";
+    window.history.replaceState({}, "", "/main-goals");
 
     render(<App />);
 

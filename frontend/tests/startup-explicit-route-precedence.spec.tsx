@@ -20,7 +20,7 @@ describe("startup explicit route precedence", () => {
       schema_version: 1,
     });
 
-    restore = renderAppAt("#/reward-history").restore;
+    restore = renderAppAt("/reward-history").restore;
 
     await waitFor(() => expect(screen.getByText("No reward events yet.")).toBeTruthy());
   });

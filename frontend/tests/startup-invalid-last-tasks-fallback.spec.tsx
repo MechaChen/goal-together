@@ -20,7 +20,7 @@ describe("startup invalid last tasks fallback", () => {
       schema_version: 1,
     });
 
-    restore = renderAppAt("#/").restore;
+    restore = renderAppAt("/").restore;
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Tasks" })).toBeTruthy());
   });
