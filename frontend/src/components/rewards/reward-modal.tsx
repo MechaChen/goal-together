@@ -11,6 +11,97 @@ import goalTogetherFighting from "../../assets/images/goal-together-logo-fightin
 import goalTogetherMainGoalCompleted from "../../assets/images/goal-together-logo-main-goal-completed.png";
 import goalTogetherSubGoalCompleted from "../../assets/images/goal-together-logo-subgoal-completed.png";
 import { TokenIcon } from "./token-icon";
+import { playRewardAudio } from "../../services/rewards/reward-audio";
+
+type RewardLogoMeta = {
+  src: string;
+  alt: string;
+};
+
+function getRewardLogoMeta(rewardType: RewardModalQueueItem["reward_type"]): RewardLogoMeta | null {
+  if (rewardType === "SUBGOAL_COMPLETE") {
+    return {
+      src: goalTogetherCongragulation,
+      alt: "Sub goal complete reward",
+    };
+  }
+
+  if (rewardType === "SUBGOAL_NEAR_COMPLETE") {
+    return {
+      src: goalTogetherFighting,
+      alt: "Near complete reward",
+    };
+  }
+
+  if (rewardType === "MAIN_GOAL_MANUAL_COMPLETE") {
+    return {
+      src: goalTogetherMainGoalCompleted,
+      alt: "Main goal completed reward",
+    };
+  }
+
+  if (rewardType === "SUBGOAL_MANUAL_COMPLETE") {
+    return {
+      src: goalTogetherSubGoalCompleted,
+      alt: "Sub goal completed reward",
+    };
+  }
+
+  return null;
+}
+
+function getRewardMessage(activeReward: RewardModalQueueItem): string {
+  return activeReward.reason || "Reward granted";
+}
+
+type RewardLogoSectionProps = {
+  logo: RewardLogoMeta;
+  message: string;
+};
+
+function RewardLogoSection({ logo, message }: RewardLogoSectionProps) {
+  return (
+    <div className="mx-auto mb-3 w-fit flex flex-col items-center justify-center">
+      <img
+        src={logo.src}
+        alt={logo.alt}
+        className="h-[200px] w-[200px] object-contain"
+      />
+      <p className="mb-3 text-md font-medium text-ink-strong">
+        {message}
+      </p>
+    </div>
+  );
+}
+
+type RewardAmountSectionProps = {
+  tokenAmount: number;
+};
+
+function RewardAmountSection({ tokenAmount }: RewardAmountSectionProps) {
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <div className="reward-coin-flip">
+        <TokenIcon size={72} label="Reward token" />
+      </div>
+      <p className="text-xl font-bold text-ink-strong">
+        +{tokenAmount} tokens
+      </p>
+    </div>
+  );
+}
+
+type RewardFallbackMessageProps = {
+  message: string;
+};
+
+function RewardFallbackMessage({ message }: RewardFallbackMessageProps) {
+  return (
+    <p className="mt-1 text-xs font-medium text-ink-soft">
+      {message}
+    </p>
+  );
+}
 
 export function RewardModal() {
   const [queue, setQueue] = useState<RewardModalQueueItem[]>(() =>
@@ -23,41 +114,35 @@ export function RewardModal() {
     });
   }, []);
 
-  const active = queue[0];
+  const activeReward = queue[0];
 
   useEffect(() => {
-    if (!active) {
+    if (!activeReward) {
+      return;
+    }
+    try {
+      playRewardAudio(activeReward);
+    } catch {
+      // Ignore unsupported audio runtime environments (e.g. jsdom tests).
+    }
+  }, [activeReward]);
+
+  useEffect(() => {
+    if (!activeReward) {
       return;
     }
     const timer = window.setTimeout(() => {
       consumeRewardModal();
-    }, active.display_duration_ms);
+    }, activeReward.display_duration_ms);
     return () => window.clearTimeout(timer);
-  }, [active]);
+  }, [activeReward]);
 
-  if (!active) {
+  if (!activeReward) {
     return null;
   }
 
-  const rewardLogo =
-    active.reward_type === "SUBGOAL_COMPLETE"
-      ? goalTogetherCongragulation
-      : active.reward_type === "SUBGOAL_NEAR_COMPLETE"
-        ? goalTogetherFighting
-        : active.reward_type === "MAIN_GOAL_MANUAL_COMPLETE"
-          ? goalTogetherMainGoalCompleted
-          : active.reward_type === "SUBGOAL_MANUAL_COMPLETE"
-            ? goalTogetherSubGoalCompleted
-        : null;
-  const rewardLogoAlt =
-    active.reward_type === "SUBGOAL_COMPLETE"
-      ? "Sub goal complete reward"
-      : active.reward_type === "SUBGOAL_NEAR_COMPLETE"
-        ? "Near complete reward"
-        : active.reward_type === "MAIN_GOAL_MANUAL_COMPLETE"
-          ? "Main goal completed reward"
-          : "Sub goal completed reward";
-  const milestoneMessage = active.reason || "Reward granted";
+  const rewardLogo = getRewardLogoMeta(activeReward.reward_type);
+  const rewardMessage = getRewardMessage(activeReward);
 
   return (
     <div
@@ -71,31 +156,9 @@ export function RewardModal() {
         <p className="mb-2 text-sm uppercase tracking-widest text-accent-orange">
           Reward Earned
         </p>
-        {rewardLogo ? (
-          <div className="mx-auto mb-3 w-fit flex flex-col items-center justify-center">
-            <img
-              src={rewardLogo}
-              alt={rewardLogoAlt}
-              className="h-[200px] w-[200px] object-contain"
-            />
-            <p className="mb-3 text-md font-medium text-ink-strong">
-              {milestoneMessage}
-            </p>
-          </div>
-        ) : null}
-        <div className="flex items-center justify-center gap-2">
-          <div className="reward-coin-flip">
-            <TokenIcon size={72} label="Reward token" />
-          </div>
-            <p className="text-xl font-bold text-ink-strong">
-              +{active.token_amount} tokens
-            </p>
-          </div>
-        {!rewardLogo ? (
-          <p className="mt-1 text-xs font-medium text-ink-soft">
-            {milestoneMessage}
-          </p>
-        ) : null}
+        {rewardLogo ? <RewardLogoSection logo={rewardLogo} message={rewardMessage} /> : null}
+        <RewardAmountSection tokenAmount={activeReward.token_amount} />
+        {!rewardLogo ? <RewardFallbackMessage message={rewardMessage} /> : null}
       </div>
     </div>
   );
