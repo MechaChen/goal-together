@@ -171,6 +171,16 @@ function AppInner() {
         await rewardHierarchyApi.createMainGoal(title, description);
         await refreshData();
       }}
+      onUpdateMainGoal={async (mainGoalId, title) => {
+        try {
+          await rewardHierarchyApi.updateMainGoal(mainGoalId, title);
+          await refreshData();
+          notify("success", "Main goal renamed.");
+        } catch (err) {
+          notify("error", toErrorMessage(err));
+          throw err;
+        }
+      }}
       onCompleteMainGoal={async (mainGoalId) => {
         try {
           const result = await rewardHierarchyApi.completeMainGoal(mainGoalId);
@@ -243,6 +253,16 @@ function AppInner() {
       onCreateSubGoal={async (mainGoalId, title) => {
         await rewardHierarchyApi.createSubGoal(mainGoalId, title);
         await refreshData();
+      }}
+      onUpdateSubGoal={async (subGoalId, title) => {
+        try {
+          await rewardHierarchyApi.updateSubGoal(subGoalId, title);
+          await refreshData();
+          notify("success", "Sub goal renamed.");
+        } catch (err) {
+          notify("error", toErrorMessage(err));
+          throw err;
+        }
       }}
       onCompleteSubGoal={async (subGoalId) => {
         try {

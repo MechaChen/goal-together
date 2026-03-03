@@ -33,10 +33,12 @@ Follow TypeScript strict-mode expectations from `tsconfig.json`: prefer explicit
 ### Frontend part
 1. Keep code clean and easy to scan. If a JSX block in a component or the logic inside a function exceeds roughly 10 lines, extract it into a semantic component or helper function with a name that clearly communicates its purpose.
 2. Use `useEffect` sparingly. Prefer declarative patterns and direct data flow whenever possible, because overusing `useEffect` often introduces side effects and makes logic harder to understand.
-3. Follow clean naming conventions: use nouns for value variables and verbs for function names, in line with Clean Code principles.
-4. Avoid nested ternary operators. Use explicit conditionals or small helper functions for branching logic so the code remains readable.
-5. Always extract repeated frontend values into `frontend/src/config/*`. If a suitable file does not exist, create a semantic config file with a clear, domain-specific name.
-6. Prefer Tailwind CSS v4 theme tokens for styling. Avoid hardcoded hex colors and one-off CSS variable values in components; define semantic theme variables and consume them via Tailwind utilities for consistent, centralized styling.
+3. `useEffect` semantics rule: For every `useEffect`, define one semantic function inside the callback and call it (avoid inline multi-step logic). If this still makes the effect hard to read, replace it with a custom hook that encapsulates the behavior. If the effect logic is substantial or reused, extract it into a custom hook instead of expanding the component-level `useEffect`.
+4. Follow clean naming conventions: use nouns for value variables and verbs for function names, in line with Clean Code principles.
+5. Avoid nested ternary operators. Use explicit conditionals or small helper functions for branching logic so the code remains readable.
+6. Always extract repeated frontend values into `frontend/src/config/*`. If a suitable file does not exist, create a semantic config file with a clear, domain-specific name.
+7. Prefer Tailwind CSS v4 theme tokens for styling. Avoid hardcoded hex colors and one-off CSS variable values in components; define semantic theme variables and consume them via Tailwind utilities for consistent, centralized styling.
+8. Event handler naming rule: Use semantic, intent-revealing names for event handlers. Avoid generic patterns like `handleXXXOnXXX` when a clearer verb + domain/action name can be used (for example, prefer `openRenameEditor`, `submitSubGoalTitle`, `closeSidebarOnEscape`).
 
 ## Test phase guide
 
@@ -49,7 +51,7 @@ Aim to cover core user journeys, async backend behavior, and integration boundar
 
 ## Commit & Pull Request Guidelines
 The repository currently ships without shared Git history, so default to Conventional Commits (`feat:`, `fix:`, `chore:`) to keep future changelog automation simple. Commit messages must always satisfy commit-lint compatible Conventional Commit format (for example: `feat(frontend): align header logo with figma`).
-When the user requests a commit, first summarize the current unstaged changes, then create a commit that follows commitlint-compatible Conventional Commit format, and include the user's previous requirement prompts in the commit description/body.
+When the user requests a commit, first summarize the current unstaged changes and show the exact commit data you plan to use (files, commit message, and commit body). Wait for user review/approval before running `git commit`. After approval, create the commit using commitlint-compatible Conventional Commit format and include the user's previous requirement prompts in the commit description/body.
 Each pull request should describe the change, list manual verification steps (e.g., `pnpm dev` for frontend and backend service run/test commands), and link any tracking issue. Include screenshots or curl output for API changes and note follow-up tasks if you defer work.
 For feature branches, prefer semantic clarity over extreme brevity. Descriptive names like
 `todo-with-target-and-limit` are acceptable when they improve intent readability.

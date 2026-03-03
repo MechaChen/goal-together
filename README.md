@@ -11,18 +11,32 @@
 - [x] when all tasks of any sub goal are completed, the subgoal should be checked
 - [x] subtask completion won't give new reward, since tasks cannot be changed, but main goal completion still does
 - [x] when tasks are confirmed, the +Add task button should be disabled
+- [ ] redesign reward mechanism
+- [ ] when main goal is completed, cannot add new sub goal in it.
 
 ### New ideas
 
-- [] if the subgoal is done, switch to next subgoal
-- [] add voice effect when getting token
-- [] AI feature - suggest a strong sense of achievement with little effort
-- [] AI feature - Retro system
+- [x] add voice effect when getting token
+- [ ] Update sub goal / main goal name
+- [ ] Limit number of subtask to prevent user from burning out
+- [ ] Adding tasks estimation time, and add all up to subgoal, then can adding more reward based on time consuming as well
+- [ ] A task should be finsihed within XXX minute?
+- [ ] Depolyment plan - Supabase DB ready
+- [ ] Deployment plan - AWS Server ready
+- [ ] Deployment plan - Frontend ready
+- [ ] Deployment plan - DNS ready
+- [ ] progress bar show which point can get bonus, like bar in 60%
+- [ ] if the subgoal is done, switch to next subgoal
+- [ ] AI feature - suggest a strong sense of achievement with little effort
+- [ ] AI feature - Retro system
+- [ ] Encourage "Confirming tasks" and give token award as well?
+- [ ] Archive main goal / sub goal features, some features I don't want to see anymore
 
 ### Development Enhancement
 
-- [] Try to figure out the way to add LSP server
-- [] Try to add guide for unit testing
+- [ ] Try to figure out the way to add LSP server
+- [ ] Try to add guide for unit testing
+- [ ] Prevent `handleXXXOnXXX` such no meaning function name
 
 ## Prerequisites
 

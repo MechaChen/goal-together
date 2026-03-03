@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { CircleCheck, Circle, Plus, History } from "lucide-react";
 import { RowMoreMenu } from "../components/actions/row-more-menu";
+import { GoalTitleEditor } from "../components/goals/goal-title-editor";
 import { MAIN_GOALS_PAGE_COPY, MAIN_GOALS_PAGE_UI } from "../config/main-goals-page.config";
 import {
   formatProgressFraction,
@@ -13,6 +14,7 @@ import type { MainGoalItem } from "../services/reward-hierarchy.types";
 type MainGoalsPageProps = {
   items: MainGoalItem[];
   onCreateMainGoal: (title: string, description?: string) => Promise<void>;
+  onUpdateMainGoal: (id: string, title: string) => Promise<void>;
   onDeleteMainGoal: (id: string) => Promise<void>;
   onCompleteMainGoal: (id: string) => Promise<void>;
   onOpenSubGoals: (id: string) => void;
@@ -97,6 +99,7 @@ type MainGoalListItemProps = {
   goal: MainGoalItem;
   onOpenSubGoals: (id: string) => void;
   onCompleteMainGoal: (id: string) => Promise<void>;
+  onUpdateMainGoal: (id: string, title: string) => Promise<void>;
   onDeleteMainGoal: (id: string) => Promise<void>;
 };
 
@@ -104,11 +107,42 @@ function MainGoalListItem({
   goal,
   onOpenSubGoals,
   onCompleteMainGoal,
+  onUpdateMainGoal,
   onDeleteMainGoal,
 }: MainGoalListItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const titleClass = getMainGoalTitleClass(goal.is_completed);
   const description = buildMainGoalDescription(goal);
   const progress = getMainGoalProgress(goal);
+
+  function completeMainGoal() {
+    if (!goal.is_completed) {
+      void onCompleteMainGoal(goal.id);
+    }
+  }
+
+  function openSubGoalList() {
+    onOpenSubGoals(goal.id);
+  }
+
+  function openRenameEditor() {
+    setIsEditing(true);
+  }
+
+  function cancelRenameEditor() {
+    setIsEditing(false);
+  }
+
+  async function saveRenamedMainGoalTitle(title: string) {
+    await onUpdateMainGoal(goal.id, title);
+    setIsEditing(false);
+  }
+
+  function confirmAndDeleteMainGoal() {
+    if (window.confirm(`Delete main goal "${goal.title}"?`)) {
+      void onDeleteMainGoal(goal.id);
+    }
+  }
 
   return (
     <li className="border-b border-line-soft py-2 last:border-none">
@@ -119,9 +153,7 @@ function MainGoalListItem({
           disabled={goal.is_completed}
           onClick={(event) => {
             event.stopPropagation();
-            if (!goal.is_completed) {
-              void onCompleteMainGoal(goal.id);
-            }
+            completeMainGoal();
           }}
           type="button"
         >
@@ -131,19 +163,43 @@ function MainGoalListItem({
             <Circle size={MAIN_GOALS_PAGE_UI.statusIconSize} className="text-ink-icon" />
           )}
         </button>
-        <button className="flex-1 text-left" onClick={() => onOpenSubGoals(goal.id)} type="button">
+        {isEditing ? (
           <div className="flex-1">
             <p className={titleClass}>{goal.title}</p>
+            <GoalTitleEditor
+              initialTitle={goal.title}
+              onSave={saveRenamedMainGoalTitle}
+              onCancel={cancelRenameEditor}
+            />
             <p className="text-xs text-ink-soft">{description}</p>
             <p className="text-xs font-medium text-ink-soft">
               {formatProgressLabel(progress)} · {formatProgressFraction(progress)}
             </p>
           </div>
-        </button>
+        ) : (
+          <button className="flex-1 text-left" onClick={openSubGoalList} type="button">
+            <div className="flex-1">
+              <p className={titleClass}>{goal.title}</p>
+              <p className="text-xs text-ink-soft">{description}</p>
+              <p className="text-xs font-medium text-ink-soft">
+                {formatProgressLabel(progress)} · {formatProgressFraction(progress)}
+              </p>
+            </div>
+          </button>
+        )}
         <RowMoreMenu
           menuLabel="More actions"
-          confirmMessage={`Delete main goal \"${goal.title}\"?`}
-          onDelete={async () => onDeleteMainGoal(goal.id)}
+          actions={[
+            {
+              label: "Rename",
+              onSelect: openRenameEditor,
+            },
+            {
+              label: "Delete",
+              tone: "danger",
+              onSelect: confirmAndDeleteMainGoal,
+            },
+          ]}
         />
       </div>
     </li>
@@ -154,6 +210,7 @@ type MainGoalsListProps = {
   items: MainGoalItem[];
   onOpenSubGoals: (id: string) => void;
   onCompleteMainGoal: (id: string) => Promise<void>;
+  onUpdateMainGoal: (id: string, title: string) => Promise<void>;
   onDeleteMainGoal: (id: string) => Promise<void>;
 };
 
@@ -161,6 +218,7 @@ function MainGoalsList({
   items,
   onOpenSubGoals,
   onCompleteMainGoal,
+  onUpdateMainGoal,
   onDeleteMainGoal,
 }: MainGoalsListProps) {
   return (
@@ -171,6 +229,7 @@ function MainGoalsList({
           goal={goal}
           onOpenSubGoals={onOpenSubGoals}
           onCompleteMainGoal={onCompleteMainGoal}
+          onUpdateMainGoal={onUpdateMainGoal}
           onDeleteMainGoal={onDeleteMainGoal}
         />
       ))}
@@ -181,6 +240,7 @@ function MainGoalsList({
 export function MainGoalsPage({
   items,
   onCreateMainGoal,
+  onUpdateMainGoal,
   onCompleteMainGoal,
   onDeleteMainGoal,
   onOpenSubGoals,
@@ -189,7 +249,7 @@ export function MainGoalsPage({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  async function handleSubmit(event: FormEvent) {
+  async function submitNewMainGoal(event: FormEvent) {
     event.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) {
@@ -208,7 +268,7 @@ export function MainGoalsPage({
         description={description}
         onTitleChange={setTitle}
         onDescriptionChange={setDescription}
-        onSubmit={(event) => void handleSubmit(event)}
+        onSubmit={(event) => void submitNewMainGoal(event)}
       />
 
       {items.length === 0 ? <MainGoalsEmptyState /> : null}
@@ -216,6 +276,7 @@ export function MainGoalsPage({
         items={items}
         onOpenSubGoals={onOpenSubGoals}
         onCompleteMainGoal={onCompleteMainGoal}
+        onUpdateMainGoal={onUpdateMainGoal}
         onDeleteMainGoal={onDeleteMainGoal}
       />
     </section>

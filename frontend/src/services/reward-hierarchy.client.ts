@@ -54,6 +54,15 @@ export const rewardHierarchyApi = {
       method: "POST",
       body: JSON.stringify({ title, description }),
     }),
+  updateMainGoal: (
+    mainGoalId: string,
+    title: string,
+    description?: string | null,
+  ) =>
+    request<MainGoalItem>(`/main-goals/${mainGoalId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ title, description }),
+    }),
   deleteMainGoal: (mainGoalId: string) =>
     request<void>(`/main-goals/${mainGoalId}`, {
       method: "DELETE",
@@ -65,6 +74,11 @@ export const rewardHierarchyApi = {
   createSubGoal: (mainGoalId: string, title: string) =>
     request<SubGoalItem>(`/main-goals/${mainGoalId}/sub-goals`, {
       method: "POST",
+      body: JSON.stringify({ title }),
+    }),
+  updateSubGoal: (subGoalId: string, title: string) =>
+    request<SubGoalItem>(`/sub-goals/${subGoalId}`, {
+      method: "PATCH",
       body: JSON.stringify({ title }),
     }),
   completeSubGoal: (subGoalId: string) =>

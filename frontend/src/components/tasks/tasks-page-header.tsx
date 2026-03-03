@@ -11,7 +11,12 @@ function getHeadingText(subGoalTitle: string | null): string {
     return TASKS_PAGE_COPY.title;
   }
 
-  return `${TASKS_PAGE_COPY.titlePrefix} ${subGoalTitle}`;
+  return (
+    <>
+      {TASKS_PAGE_COPY.titlePrefix}{" "}
+      <span className="underline">{subGoalTitle}</span>
+    </>
+  );
 }
 
 export function TasksPageHeader({ subGoalTitle }: TasksPageHeaderProps) {

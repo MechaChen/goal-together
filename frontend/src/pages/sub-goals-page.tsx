@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Circle, CircleCheck, Plus } from "lucide-react";
 
 import { RowMoreMenu } from "../components/actions/row-more-menu";
+import { GoalTitleEditor } from "../components/goals/goal-title-editor";
 import { HierarchySidebar } from "../components/layout/hierarchy-sidebar";
 import {
   formatProgressFraction,
@@ -14,6 +15,7 @@ type SubGoalsPageProps = {
   items: MainGoalItem[];
   selectedMainGoalId: string | null;
   onCreateSubGoal: (mainGoalId: string, title: string) => Promise<void>;
+  onUpdateSubGoal: (subGoalId: string, title: string) => Promise<void>;
   onCompleteSubGoal: (subGoalId: string) => Promise<void>;
   onDeleteSubGoal: (subGoalId: string) => Promise<void>;
   onSelectMainGoal: (id: string) => void;
@@ -26,17 +28,97 @@ type SubGoalsPageProps = {
 type SubGoalListItemProps = {
   subGoal: MainGoalItem["sub_goals"][number];
   onOpenTasks: (id: string) => void;
+  onUpdateSubGoal: (subGoalId: string, title: string) => Promise<void>;
   onCompleteSubGoal: (subGoalId: string) => Promise<void>;
   onDeleteSubGoal: (subGoalId: string) => Promise<void>;
 };
 
+type UseSidebarEscapeToCloseParams = {
+  isOpen: boolean;
+  closeSidebar: () => void;
+};
+
+function useSidebarEscapeToClose({ isOpen, closeSidebar }: UseSidebarEscapeToCloseParams) {
+  useEffect(() => {
+    function registerSidebarEscapeHandler() {
+      function closeSidebarOnEscape(event: KeyboardEvent) {
+        if (event.key === "Escape") {
+          closeSidebar();
+        }
+      }
+
+      window.addEventListener("keydown", closeSidebarOnEscape);
+      return () => window.removeEventListener("keydown", closeSidebarOnEscape);
+    }
+
+    if (!isOpen) {
+      return;
+    }
+
+    return registerSidebarEscapeHandler();
+  }, [closeSidebar, isOpen]);
+}
+
+function buildSubGoalRowActions(params: {
+  openRenameEditor: () => void;
+  confirmAndDeleteSubGoal: () => void;
+}) {
+  return [
+    {
+      label: "Rename",
+      onSelect: params.openRenameEditor,
+    },
+    {
+      label: "Delete",
+      tone: "danger" as const,
+      onSelect: params.confirmAndDeleteSubGoal,
+    },
+  ];
+}
+
 function SubGoalListItem({
   subGoal,
   onOpenTasks,
+  onUpdateSubGoal,
   onCompleteSubGoal,
   onDeleteSubGoal,
 }: SubGoalListItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const progress = getSubGoalProgress(subGoal);
+
+  function completeSubGoal() {
+    if (!subGoal.is_completed) {
+      void onCompleteSubGoal(subGoal.id);
+    }
+  }
+
+  function openSubGoalTasks() {
+    onOpenTasks(subGoal.id);
+  }
+
+  function openRenameEditor() {
+    setIsEditing(true);
+  }
+
+  function cancelRenameEditor() {
+    setIsEditing(false);
+  }
+
+  async function saveRenamedSubGoalTitle(title: string) {
+    await onUpdateSubGoal(subGoal.id, title);
+    setIsEditing(false);
+  }
+
+  function confirmAndDeleteSubGoal() {
+    if (window.confirm(`Delete sub goal "${subGoal.title}"?`)) {
+      void onDeleteSubGoal(subGoal.id);
+    }
+  }
+
+  const rowActions = buildSubGoalRowActions({
+    openRenameEditor,
+    confirmAndDeleteSubGoal,
+  });
 
   return (
     <li className="border-b border-line-soft py-2 last:border-none">
@@ -47,9 +129,7 @@ function SubGoalListItem({
           disabled={subGoal.is_completed}
           onClick={(event) => {
             event.stopPropagation();
-            if (!subGoal.is_completed) {
-              void onCompleteSubGoal(subGoal.id);
-            }
+            completeSubGoal();
           }}
           type="button"
         >
@@ -59,20 +139,35 @@ function SubGoalListItem({
             <Circle size={24} className="text-ink-icon" />
           )}
         </button>
-        <button className="flex-1 text-left" onClick={() => onOpenTasks(subGoal.id)} type="button">
+        {isEditing ? (
           <div className="flex-1">
             <p className={`font-medium ${subGoal.is_completed ? "text-ink-disabled line-through" : "text-ink-strong"}`}>
               {subGoal.title}
             </p>
+            <GoalTitleEditor
+              initialTitle={subGoal.title}
+              onSave={saveRenamedSubGoalTitle}
+              onCancel={cancelRenameEditor}
+            />
             <p className="text-xs font-medium text-ink-soft">
               {formatProgressLabel(progress)} · {formatProgressFraction(progress)}
             </p>
           </div>
-        </button>
+        ) : (
+          <button className="flex-1 text-left" onClick={openSubGoalTasks} type="button">
+            <div className="flex-1">
+              <p className={`font-medium ${subGoal.is_completed ? "text-ink-disabled line-through" : "text-ink-strong"}`}>
+                {subGoal.title}
+              </p>
+              <p className="text-xs font-medium text-ink-soft">
+                {formatProgressLabel(progress)} · {formatProgressFraction(progress)}
+              </p>
+            </div>
+          </button>
+        )}
         <RowMoreMenu
           menuLabel="More actions"
-          confirmMessage={`Delete sub goal \"${subGoal.title}\"?`}
-          onDelete={async () => onDeleteSubGoal(subGoal.id)}
+          actions={rowActions}
         />
       </div>
     </li>
@@ -83,6 +178,7 @@ export function SubGoalsPage({
   items,
   selectedMainGoalId,
   onCreateSubGoal,
+  onUpdateSubGoal,
   onCompleteSubGoal,
   onDeleteSubGoal,
   onSelectMainGoal,
@@ -94,18 +190,30 @@ export function SubGoalsPage({
   const [title, setTitle] = useState("");
   const mainGoal = items.find((goal) => goal.id === selectedMainGoalId) ?? null;
 
-  useEffect(() => {
-    if (!isSidebarOpen) {
+  useSidebarEscapeToClose({ isOpen: isSidebarOpen, closeSidebar: onCloseSidebar });
+
+  function submitNewSubGoal(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!mainGoal) {
       return;
     }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onCloseSidebar();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isSidebarOpen, onCloseSidebar]);
+    const trimmed = title.trim();
+    if (!trimmed) {
+      return;
+    }
+    void onCreateSubGoal(mainGoal.id, trimmed);
+    setTitle("");
+  }
+
+  function selectMainGoalAndCloseSidebar(mainGoalId: string) {
+    onSelectMainGoal(mainGoalId);
+    onCloseSidebar();
+  }
+
+  function navigateBackToMainAndCloseSidebar() {
+    onBackToMain();
+    onCloseSidebar();
+  }
 
   return (
     <section className="relative">
@@ -130,14 +238,8 @@ export function SubGoalsPage({
               }))}
               selectedId={selectedMainGoalId}
               emptyText="No main goals yet."
-              onSelect={(id) => {
-                onSelectMainGoal(id);
-                onCloseSidebar();
-              }}
-              onBackToMain={() => {
-                onBackToMain();
-                onCloseSidebar();
-              }}
+              onSelect={selectMainGoalAndCloseSidebar}
+              onBackToMain={navigateBackToMainAndCloseSidebar}
             />
           </div>
         </>
@@ -153,17 +255,7 @@ export function SubGoalsPage({
         ) : null}
         {mainGoal ? (
           <>
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                const trimmed = title.trim();
-                if (!trimmed) {
-                  return;
-                }
-                void onCreateSubGoal(mainGoal.id, trimmed);
-                setTitle("");
-              }}
-            >
+            <form onSubmit={submitNewSubGoal}>
               <div className="flex overflow-hidden rounded-full border border-soft bg-white">
                 <input
                   className="flex-1 bg-transparent px-5 py-3 text-base text-ink-strong outline-none placeholder:text-ink-soft"
@@ -192,6 +284,7 @@ export function SubGoalsPage({
                   key={subGoal.id}
                   subGoal={subGoal}
                   onOpenTasks={onOpenTasks}
+                  onUpdateSubGoal={onUpdateSubGoal}
                   onCompleteSubGoal={onCompleteSubGoal}
                   onDeleteSubGoal={onDeleteSubGoal}
                 />

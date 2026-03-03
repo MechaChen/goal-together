@@ -89,6 +89,22 @@ export function installMockApi(options?: {
       return respond(201, tree[tree.length - 1]);
     }
 
+    if (url.includes("/main-goals/") && method === "PATCH") {
+      const mainGoalId = url.split("/main-goals/")[1].split("/")[0];
+      const payload = JSON.parse(String(init?.body ?? "{}")) as { title?: string; description?: string | null };
+      const mainGoal = tree.find((item) => item.id === mainGoalId);
+      if (!mainGoal) {
+        return respond(404, { message: "main goal not found", code: "NOT_FOUND" });
+      }
+      if (typeof payload.title === "string") {
+        mainGoal.title = payload.title;
+      }
+      if (payload.description !== undefined) {
+        mainGoal.description = payload.description ?? null;
+      }
+      return respond(200, mainGoal);
+    }
+
     if (url.includes("/main-goals/") && url.endsWith("/sub-goals") && method === "POST") {
       const mainGoalId = url.split("/main-goals/")[1].split("/")[0];
       const payload = JSON.parse(String(init?.body ?? "{}")) as { title?: string };
@@ -106,6 +122,22 @@ export function installMockApi(options?: {
       };
       mainGoal.sub_goals.push(subGoal);
       return respond(201, subGoal);
+    }
+
+    if (url.includes("/sub-goals/") && method === "PATCH") {
+      const subGoalId = url.split("/sub-goals/")[1].split("/")[0];
+      const payload = JSON.parse(String(init?.body ?? "{}")) as { title?: string };
+      for (const goal of tree) {
+        const subGoal = goal.sub_goals.find((item) => item.id === subGoalId);
+        if (!subGoal) {
+          continue;
+        }
+        if (typeof payload.title === "string") {
+          subGoal.title = payload.title;
+        }
+        return respond(200, subGoal);
+      }
+      return respond(404, { message: "sub goal not found", code: "NOT_FOUND" });
     }
 
     if (url.includes("/main-goals/") && url.endsWith("/complete") && method === "POST") {
