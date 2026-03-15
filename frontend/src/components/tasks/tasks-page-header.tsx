@@ -1,12 +1,13 @@
 import { ListTodo } from "lucide-react";
 
 import { TASKS_PAGE_COPY } from "../../config/tasks-page.config";
+import { ReactNode } from "react";
 
 type TasksPageHeaderProps = {
   subGoalTitle: string | null;
 };
 
-function getHeadingText(subGoalTitle: string | null): string {
+function getHeadingText(subGoalTitle: string | null): ReactNode {
   if (!subGoalTitle) {
     return TASKS_PAGE_COPY.title;
   }

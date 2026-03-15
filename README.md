@@ -17,7 +17,11 @@
 ### New ideas
 
 - [x] add voice effect when getting token
-- [ ] Update sub goal / main goal name
+- [x] Update sub goal / main goal name
+- [ ] Login system before released & reward
+- [ ] Passkey (WebAuth)
+- [ ] Adding level system, level up to unlock the features (e.g. custom rewarding sound)
+- [ ] Add Today's mission
 - [ ] Limit number of subtask to prevent user from burning out
 - [ ] Adding tasks estimation time, and add all up to subgoal, then can adding more reward based on time consuming as well
 - [ ] A task should be finsihed within XXX minute?
