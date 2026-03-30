@@ -33,7 +33,7 @@ export function AppToastBanner({ toast, onClose }: AppToastProps) {
   }
 
   return (
-    <div className="fixed right-4 top-24 z-50 w-[360px] max-w-[calc(100vw-2rem)]">
+    <div className="fixed right-4 top-24 z-[80] w-[360px] max-w-[calc(100vw-2rem)]">
       <div className={`flex items-start gap-2 rounded-2xl border px-4 py-3 shadow-md ${getToastStyle(toast.kind)}`}>
         <ToastIcon kind={toast.kind} />
         <p className="flex-1 text-sm font-medium">{toast.message}</p>

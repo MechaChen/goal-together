@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from src.api.main_goals import router as main_goals_router
+from src.api.reward_audio import router as reward_audio_router
 from src.api.rewards_history import router as rewards_history_router
 from src.api.sub_goals import router as sub_goals_router
 from src.api.tasks_complete import router as tasks_complete_router
@@ -15,3 +16,4 @@ router.include_router(tasks_confirm_router)
 router.include_router(tasks_complete_router)
 router.include_router(wallet_get_router)
 router.include_router(rewards_history_router)
+router.include_router(reward_audio_router)

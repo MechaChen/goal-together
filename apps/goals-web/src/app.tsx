@@ -10,6 +10,8 @@ import {
 } from "react-router-dom";
 
 import { AppShell } from "./components/layout/app-shell";
+import { RewardAudioSettingsModal } from "./components/rewards/reward-audio-settings-modal";
+import { REWARD_AUDIO_SETTINGS_COPY } from "./config/reward-audio-settings.config";
 import { MainGoalsPage } from "./pages/main-goals-page";
 import { RewardHistoryPage } from "./pages/reward-history-page";
 import { SubGoalsPage } from "./pages/sub-goals-page";
@@ -32,6 +34,12 @@ import {
   enqueueRewardModal,
   enqueueRewardModals,
 } from "./services/reward-modal-queue.service";
+import {
+  getRewardAudioSettingsSnapshot,
+  previewRewardAudioSlot,
+  replaceRewardAudioSettings,
+  syncRewardAudioSettings,
+} from "./services/rewards/reward-audio-settings";
 import { resolveLaunchPath } from "./services/navigation-launch.resolver";
 import {
   clearLastOpenedTasksContext,
@@ -68,6 +76,11 @@ function AppInner() {
   const [appToast, setAppToast] = useState<AppToast | null>(null);
   const [dataReady, setDataReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isRewardAudioModalOpen, setIsRewardAudioModalOpen] = useState(false);
+  const [rewardAudioSettings, setRewardAudioSettings] = useState(
+    getRewardAudioSettingsSnapshot(),
+  );
+  const [isRewardAudioLoading, setIsRewardAudioLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -110,6 +123,16 @@ function AppInner() {
     setWalletBalance(wallet.balance);
   }
 
+  async function refreshRewardAudioSettings() {
+    setIsRewardAudioLoading(true);
+    try {
+      const settings = await syncRewardAudioSettings();
+      setRewardAudioSettings(settings);
+    } finally {
+      setIsRewardAudioLoading(false);
+    }
+  }
+
   useEffect(() => {
     void refreshData()
       .catch((err) => {
@@ -118,6 +141,12 @@ function AppInner() {
         );
       })
       .finally(() => setDataReady(true));
+  }, []);
+
+  useEffect(() => {
+    void refreshRewardAudioSettings().catch(() => {
+      // Reward audio settings are non-blocking; the app falls back to bundled sounds.
+    });
   }, []);
 
   useEffect(() => {
@@ -167,6 +196,14 @@ function AppInner() {
         navigate(`/sub-goals/${toNameIdSegment(mainGoal.title, mainGoal.id)}`);
       }}
       onOpenRewardHistory={() => navigate("/reward-history")}
+      onOpenRewardAudioSettings={() => {
+        setIsRewardAudioModalOpen(true);
+        if (!rewardAudioSettings) {
+          void refreshRewardAudioSettings().catch((err) => {
+            notify("error", toErrorMessage(err));
+          });
+        }
+      }}
       onCreateMainGoal={async (title, description) => {
         await rewardHierarchyApi.createMainGoal(title, description);
         await refreshData();
@@ -364,53 +401,82 @@ function AppInner() {
   );
 
   return (
-    <AppShell
-      isSidebarEnabled={hasSidebar}
-      isSidebarOpen={hasSidebar && isSidebarOpen}
-      walletBalance={walletBalance}
-      appToast={appToast}
-      onDismissToast={() => setAppToast(null)}
-      onToggleSidebar={() => {
-        if (!hasSidebar) {
-          return;
-        }
-        setIsSidebarOpen((value) => !value);
-      }}
-    >
-      {error ? (
-        <p className="rounded bg-red-100 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
-      <Routes>
-        <Route
-          path="/"
-          element={
-            dataReady ? (
-              <RootEntryRedirect items={items} />
-            ) : (
-              <p className="text-sm text-ink-soft">Loading...</p>
-            )
+    <>
+      <AppShell
+        isSidebarEnabled={hasSidebar}
+        isSidebarOpen={hasSidebar && isSidebarOpen}
+        walletBalance={walletBalance}
+        appToast={appToast}
+        onDismissToast={() => setAppToast(null)}
+        onToggleSidebar={() => {
+          if (!hasSidebar) {
+            return;
           }
-        />
-        <Route path="/main-goals" element={mainGoalsElement} />
-        <Route path="/sub-goals" element={subGoalsElement} />
-        <Route path="/sub-goals/:mainSegment" element={subGoalsElement} />
-        <Route path="/tasks" element={tasksElement} />
-        <Route path="/tasks/:mainSegment" element={tasksElement} />
-        <Route path="/tasks/:mainSegment/:subSegment" element={tasksElement} />
-        <Route
-          path="/reward-history"
-          element={
-            <RewardHistoryPage
-              items={historyItems}
-              onBackToMain={() => navigate("/main-goals")}
-            />
+          setIsSidebarOpen((value) => !value);
+        }}
+      >
+        {error ? (
+          <p className="rounded bg-red-100 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        ) : null}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              dataReady ? (
+                <RootEntryRedirect items={items} />
+              ) : (
+                <p className="text-sm text-ink-soft">Loading...</p>
+              )
+            }
+          />
+          <Route path="/main-goals" element={mainGoalsElement} />
+          <Route path="/sub-goals" element={subGoalsElement} />
+          <Route path="/sub-goals/:mainSegment" element={subGoalsElement} />
+          <Route path="/tasks" element={tasksElement} />
+          <Route path="/tasks/:mainSegment" element={tasksElement} />
+          <Route path="/tasks/:mainSegment/:subSegment" element={tasksElement} />
+          <Route
+            path="/reward-history"
+            element={
+              <RewardHistoryPage
+                items={historyItems}
+                onBackToMain={() => navigate("/main-goals")}
+              />
+            }
+          />
+          <Route path="*" element={<Navigate to="/main-goals" replace />} />
+        </Routes>
+      </AppShell>
+      <RewardAudioSettingsModal
+        isOpen={isRewardAudioModalOpen}
+        isLoading={isRewardAudioLoading}
+        settings={rewardAudioSettings}
+        onClose={() => setIsRewardAudioModalOpen(false)}
+        onPreviewSlot={(slot) => previewRewardAudioSlot(slot)}
+        onUploadSlot={async (slot, file) => {
+          try {
+            const settings = await rewardHierarchyApi.uploadRewardAudio(slot, file);
+            setRewardAudioSettings(replaceRewardAudioSettings(settings));
+            notify("success", REWARD_AUDIO_SETTINGS_COPY.successUpload);
+          } catch (err) {
+            notify("error", toErrorMessage(err));
+            throw err;
           }
-        />
-        <Route path="*" element={<Navigate to="/main-goals" replace />} />
-      </Routes>
-    </AppShell>
+        }}
+        onRemoveSlot={async (slot) => {
+          try {
+            const settings = await rewardHierarchyApi.deleteRewardAudio(slot);
+            setRewardAudioSettings(replaceRewardAudioSettings(settings));
+            notify("success", REWARD_AUDIO_SETTINGS_COPY.successDelete);
+          } catch (err) {
+            notify("error", toErrorMessage(err));
+            throw err;
+          }
+        }}
+      />
+    </>
   );
 }
 

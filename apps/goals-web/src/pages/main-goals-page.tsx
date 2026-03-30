@@ -1,8 +1,9 @@
 import { FormEvent, useState } from "react";
-import { CircleCheck, Circle, Plus, History } from "lucide-react";
+import { CircleCheck, Circle, Plus, History, Music4 } from "lucide-react";
 import { RowMoreMenu } from "../components/actions/row-more-menu";
 import { GoalTitleEditor } from "../components/goals/goal-title-editor";
 import { MAIN_GOALS_PAGE_COPY, MAIN_GOALS_PAGE_UI } from "../config/main-goals-page.config";
+import { REWARD_AUDIO_SETTINGS_UI } from "../config/reward-audio-settings.config";
 import {
   formatProgressFraction,
   formatProgressLabel,
@@ -19,6 +20,7 @@ type MainGoalsPageProps = {
   onCompleteMainGoal: (id: string) => Promise<void>;
   onOpenSubGoals: (id: string) => void;
   onOpenRewardHistory: () => void;
+  onOpenRewardAudioSettings: () => void;
 };
 
 function buildMainGoalDescription(goal: MainGoalItem): string {
@@ -31,19 +33,34 @@ function getMainGoalTitleClass(isCompleted: boolean): string {
 
 type MainGoalsHeaderProps = {
   onOpenRewardHistory: () => void;
+  onOpenRewardAudioSettings: () => void;
 };
 
-function MainGoalsHeader({ onOpenRewardHistory }: MainGoalsHeaderProps) {
+function MainGoalsHeader({
+  onOpenRewardHistory,
+  onOpenRewardAudioSettings,
+}: MainGoalsHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <h2 className="text-lg font-semibold text-ink-strong">{MAIN_GOALS_PAGE_COPY.title}</h2>
-      <button
-        className="inline-flex items-center gap-2 rounded-full border border-muted bg-surface-muted px-3 py-1 text-sm font-medium text-ink-soft"
-        onClick={onOpenRewardHistory}
-      >
-        <History size={MAIN_GOALS_PAGE_UI.actionIconSize} aria-hidden />
-        {MAIN_GOALS_PAGE_COPY.rewardHistoryButton}
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          className="inline-flex items-center gap-2 rounded-full border border-muted bg-surface-muted px-3 py-1 text-sm font-medium text-ink-soft"
+          onClick={onOpenRewardAudioSettings}
+          type="button"
+        >
+          <Music4 size={REWARD_AUDIO_SETTINGS_UI.actionIconSize} aria-hidden />
+          {MAIN_GOALS_PAGE_COPY.rewardAudioButton}
+        </button>
+        <button
+          className="inline-flex items-center gap-2 rounded-full border border-muted bg-surface-muted px-3 py-1 text-sm font-medium text-ink-soft"
+          onClick={onOpenRewardHistory}
+          type="button"
+        >
+          <History size={MAIN_GOALS_PAGE_UI.actionIconSize} aria-hidden />
+          {MAIN_GOALS_PAGE_COPY.rewardHistoryButton}
+        </button>
+      </div>
     </div>
   );
 }
@@ -245,6 +262,7 @@ export function MainGoalsPage({
   onDeleteMainGoal,
   onOpenSubGoals,
   onOpenRewardHistory,
+  onOpenRewardAudioSettings,
 }: MainGoalsPageProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -262,7 +280,10 @@ export function MainGoalsPage({
 
   return (
     <section className="space-y-4 rounded-[32px] border border-panel bg-surface-card p-4 md:p-6">
-      <MainGoalsHeader onOpenRewardHistory={onOpenRewardHistory} />
+      <MainGoalsHeader
+        onOpenRewardHistory={onOpenRewardHistory}
+        onOpenRewardAudioSettings={onOpenRewardAudioSettings}
+      />
       <MainGoalCreateForm
         title={title}
         description={description}

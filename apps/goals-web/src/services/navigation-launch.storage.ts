@@ -3,7 +3,14 @@ import { parseTasksPath } from "./navigation-launch.routes";
 import type { LastOpenedTasksContext } from "./navigation-launch.types";
 
 function hasWindow(): boolean {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
+    return false;
+  }
+  return (
+    typeof window.localStorage.getItem === "function" &&
+    typeof window.localStorage.setItem === "function" &&
+    typeof window.localStorage.removeItem === "function"
+  );
 }
 
 export function readLastOpenedTasksContext(): LastOpenedTasksContext | null {
@@ -59,4 +66,3 @@ export function clearLastOpenedTasksContext(): void {
   }
   window.localStorage.removeItem(NAVIGATION_LAUNCH_STORAGE_KEY);
 }
-

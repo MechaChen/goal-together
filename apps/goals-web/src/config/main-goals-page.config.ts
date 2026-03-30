@@ -1,6 +1,7 @@
 export const MAIN_GOALS_PAGE_COPY = {
   title: "Main Goals",
   rewardHistoryButton: "Reward History",
+  rewardAudioButton: "Reward Audio",
   titlePlaceholder: "What do you need to do?",
   addButton: "ADD",
   descriptionPlaceholder: "Optional description",

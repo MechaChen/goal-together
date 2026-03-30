@@ -115,6 +115,20 @@ class RewardHistoryResponse(BaseModel):
     items: list[RewardEventResponse]
 
 
+class RewardAudioSlotResponse(BaseModel):
+    kind: str
+    has_custom_audio: bool
+    file_url: str | None = None
+    original_filename: str | None = None
+    mime_type: str | None = None
+    file_size_bytes: int | None = None
+    updated_at: str | None = None
+
+
+class RewardAudioSettingsResponse(BaseModel):
+    slots: list[RewardAudioSlotResponse]
+
+
 class TreeTaskResponse(BaseModel):
     id: str
     sub_goal_id: str

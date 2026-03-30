@@ -1,4 +1,8 @@
-import type { MainGoalItem, RewardEvent } from "../src/services/reward-hierarchy.types";
+import type {
+  MainGoalItem,
+  RewardAudioSettings,
+  RewardEvent,
+} from "../src/services/reward-hierarchy.types";
 
 export type CompletionResponse = {
   task_reward: number;
@@ -54,10 +58,33 @@ export function installMockApi(options?: {
   completions?: CompletionResponse[];
   history?: RewardEvent[];
   confirmDraftDelayMs?: number;
+  rewardAudioSettings?: RewardAudioSettings;
 }) {
   const tree = options?.tree ?? createMockTree();
   const completionQueue = [...(options?.completions ?? [])];
   const history = options?.history ? [...options.history] : [];
+  let rewardAudioSettings = options?.rewardAudioSettings ?? {
+    slots: [
+      {
+        kind: "normal",
+        has_custom_audio: false,
+        file_url: null,
+        original_filename: null,
+        mime_type: null,
+        file_size_bytes: null,
+        updated_at: null,
+      },
+      {
+        kind: "bonus",
+        has_custom_audio: false,
+        file_url: null,
+        original_filename: null,
+        mime_type: null,
+        file_size_bytes: null,
+        updated_at: null,
+      },
+    ],
+  };
   let walletBalance = 100;
 
   const originalFetch = globalThis.fetch;
@@ -74,6 +101,51 @@ export function installMockApi(options?: {
 
     if (url.endsWith("/main-goals") && method === "GET") {
       return respond(200, { items: tree });
+    }
+
+    if (url.endsWith("/reward-audio") && method === "GET") {
+      return respond(200, rewardAudioSettings);
+    }
+
+    if (url.includes("/reward-audio/") && method === "PUT") {
+      const slot = url.split("/reward-audio/")[1].split("?")[0] as "normal" | "bonus";
+      const nextUpdatedAt = new Date().toISOString();
+      rewardAudioSettings = {
+        slots: rewardAudioSettings.slots.map((item) =>
+          item.kind === slot
+            ? {
+                kind: slot,
+                has_custom_audio: true,
+                file_url: `/reward-audio/${slot}/file?ts=${encodeURIComponent(nextUpdatedAt)}`,
+                original_filename: "uploaded.mp3",
+                mime_type: "audio/mpeg",
+                file_size_bytes: 123,
+                updated_at: nextUpdatedAt,
+              }
+            : item,
+        ),
+      };
+      return respond(200, rewardAudioSettings);
+    }
+
+    if (url.includes("/reward-audio/") && method === "DELETE") {
+      const slot = url.split("/reward-audio/")[1].split("?")[0] as "normal" | "bonus";
+      rewardAudioSettings = {
+        slots: rewardAudioSettings.slots.map((item) =>
+          item.kind === slot
+            ? {
+                kind: slot,
+                has_custom_audio: false,
+                file_url: null,
+                original_filename: null,
+                mime_type: null,
+                file_size_bytes: null,
+                updated_at: null,
+              }
+            : item,
+        ),
+      };
+      return respond(200, rewardAudioSettings);
     }
 
     if (url.endsWith("/main-goals") && method === "POST") {

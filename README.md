@@ -11,6 +11,7 @@
 - [x] when all tasks of any sub goal are completed, the subgoal should be checked
 - [x] subtask completion won't give new reward, since tasks cannot be changed, but main goal completion still does
 - [x] when tasks are confirmed, the +Add task button should be disabled
+- [ ] history record & custom reward sound should be on the header's menu's setting icon
 - [ ] redesign reward mechanism
 - [ ] when main goal is completed, cannot add new sub goal in it.
 
@@ -18,10 +19,12 @@
 
 - [x] add voice effect when getting token
 - [x] Update sub goal / main goal name
+- [ ] see tasks completed time
 - [ ] Login system before released & reward
 - [ ] Passkey (WebAuth)
 - [ ] Adding level system, level up to unlock the features (e.g. custom rewarding sound)
 - [ ] Add Today's mission
+- [ ] Add Brag/Achievement document
 - [ ] Limit number of subtask to prevent user from burning out
 - [ ] Adding tasks estimation time, and add all up to subgoal, then can adding more reward based on time consuming as well
 - [ ] A task should be finsihed within XXX minute?
@@ -45,6 +48,7 @@
 ## Prerequisites
 
 tech stack:
+
 - Python FastAPI + SQLite backend
 - React + Vite + Tailwind CSS 4 frontend
 - 5-item todo limit and progress bar
@@ -65,9 +69,9 @@ uv run uvicorn src.main:app --reload --port 8000
 ## Frontend
 
 ```bash
-cd frontend
-pnpm install --ignore-workspace
-pnpm dev
+pnpm i
+pnpm dev:goals
+pnpm dev:retro
 ```
 
 ## Testing
@@ -89,4 +93,3 @@ pnpm test --run --passWithNoTests
 4. Verify 6th todo is blocked
 5. Toggle/delete todos and verify progress bar updates
 6. Verify zero state shows `0%` and `0/0`
-

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.errors import register_error_handlers
 from src.api.router import router
 from src.services.db import init_db
+from src.services.reward_audio_service import ensure_reward_audio_storage
 
 app = FastAPI(title="Todo App API")
 
@@ -20,6 +21,7 @@ register_error_handlers(app)
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    ensure_reward_audio_storage()
     await init_db()
 
 

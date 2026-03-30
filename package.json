@@ -1,0 +1,15 @@
+{
+    "name": "goal-together",
+    "private": true,
+    "packageManager": "pnpm@10",
+    "scripts": {
+        "dev:goals": "pnpm --filter goals-web dev",
+        "dev:retro": "pnpm --filter retro-web dev",
+        "build:goals": "pnpm --filter goals-web build",
+        "build:retro": "pnpm --filter retro-web build",
+        "test:goals": "pnpm --filter goals-web test",
+        "test:retro": "pnpm --filter retro-web test",
+        "lint:goals": "pnpm --filter goals-web lint",
+        "lint:retro": "pnpm --filter retro-web lint"
+    }
+}

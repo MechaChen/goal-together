@@ -49,6 +49,13 @@ export type RewardEvent = {
   created_at: string;
 };
 
+export type RewardModalType =
+  | "TASK_COMPLETE"
+  | "SUBGOAL_NEAR_COMPLETE"
+  | "SUBGOAL_COMPLETE"
+  | "SUBGOAL_MANUAL_COMPLETE"
+  | "MAIN_GOAL_MANUAL_COMPLETE";
+
 export type RewardHistoryResponse = {
   items: RewardEvent[];
 };
@@ -107,4 +114,18 @@ export type AppToast = {
 export type ApiErrorShape = {
   code: string;
   message: string;
+};
+
+export type RewardAudioSlot = {
+  kind: "normal" | "bonus";
+  has_custom_audio: boolean;
+  file_url: string | null;
+  original_filename: string | null;
+  mime_type: string | null;
+  file_size_bytes: number | null;
+  updated_at: string | null;
+};
+
+export type RewardAudioSettings = {
+  slots: RewardAudioSlot[];
 };

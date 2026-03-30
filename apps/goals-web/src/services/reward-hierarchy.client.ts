@@ -6,6 +6,7 @@ import type {
   CompleteTaskResult,
   HierarchyResponse,
   MainGoalItem,
+  RewardAudioSettings,
   RewardHistoryResponse,
   SubGoalItem,
   TaskItem,
@@ -13,6 +14,10 @@ import type {
 } from "./reward-hierarchy.types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+
+export function toApiUrl(path: string): string {
+  return new URL(path, API_BASE).toString();
+}
 
 export class ApiError extends Error {
   constructor(
@@ -24,8 +29,11 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  const isFormDataRequest = init?.body instanceof FormData;
+  const res = await fetch(toApiUrl(path), {
+    headers: isFormDataRequest
+      ? init?.headers
+      : { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     ...init,
   });
 
@@ -141,4 +149,17 @@ export const rewardHierarchyApi = {
   },
   wallet: () => request<WalletSummary>("/wallet"),
   rewardHistory: () => request<RewardHistoryResponse>("/rewards/history"),
+  rewardAudioSettings: () => request<RewardAudioSettings>("/reward-audio"),
+  uploadRewardAudio: (slot: "normal" | "bonus", file: File) => {
+    const payload = new FormData();
+    payload.set("file", file);
+    return request<RewardAudioSettings>(`/reward-audio/${slot}`, {
+      method: "PUT",
+      body: payload,
+    });
+  },
+  deleteRewardAudio: (slot: "normal" | "bonus") =>
+    request<RewardAudioSettings>(`/reward-audio/${slot}`, {
+      method: "DELETE",
+    }),
 };
