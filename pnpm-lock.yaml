@@ -13,6 +13,12 @@ importers:
       '@fontsource/poppins':
         specifier: ^5.2.7
         version: 5.2.7
+      '@goal-together/goal-core':
+        specifier: workspace:*
+        version: link:../../packages/goal-core
+      '@goal-together/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       lucide-react:
         specifier: ^0.575.0
         version: 0.575.0(react@19.2.4)
@@ -65,6 +71,15 @@ importers:
 
   apps/retro-web:
     dependencies:
+      '@goal-together/goal-core':
+        specifier: workspace:*
+        version: link:../../packages/goal-core
+      '@goal-together/retro-core':
+        specifier: workspace:*
+        version: link:../../packages/retro-core
+      '@goal-together/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       react:
         specifier: ^19.1.0
         version: 19.2.4
@@ -99,6 +114,12 @@ importers:
       vitest:
         specifier: ^2.1.1
         version: 2.1.9(jsdom@25.0.1)(lightningcss@1.31.1)
+
+  packages/goal-core: {}
+
+  packages/retro-core: {}
+
+  packages/types: {}
 
 packages:
 

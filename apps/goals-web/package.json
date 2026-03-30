@@ -1,33 +1,35 @@
 {
-  "name": "goals-web",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "test": "vitest",
-    "lint": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@fontsource/poppins": "^5.2.7",
-    "lucide-react": "^0.575.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^6.30.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.1.11",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "jsdom": "^25.0.0",
-    "tailwindcss": "^4.1.11",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.10",
-    "vitest": "^2.1.1"
-  }
+    "name": "goals-web",
+    "private": true,
+    "version": "0.1.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "test": "vitest",
+        "lint": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@fontsource/poppins": "^5.2.7",
+        "lucide-react": "^0.575.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "react-router-dom": "^6.30.3",
+        "@goal-together/types": "workspace:*",
+        "@goal-together/goal-core": "workspace:*"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.1.11",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.0.0",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "jsdom": "^25.0.0",
+        "tailwindcss": "^4.1.11",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.10",
+        "vitest": "^2.1.1"
+    }
 }
