@@ -29,6 +29,8 @@ async def init_db() -> None:
     from src.models.task_item import TaskItem  # noqa: F401
     from src.models.token_wallet import TokenWallet  # noqa: F401
     from src.models.todo_item import TodoItem  # noqa: F401
+    from src.models.retro_entry import RetroEntry  # noqa: F401
+    from src.models.life_playbook import LifePlaybook  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

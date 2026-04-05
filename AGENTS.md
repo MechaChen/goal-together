@@ -46,6 +46,9 @@ Follow TypeScript strict-mode expectations from `tsconfig.json`: prefer explicit
 Frontend tests should live under `frontend/` and backend tests under `backend/tests/`.
 Each feature should include contract validation when frontend-backend interactions change.
 Aim to cover core user journeys, async backend behavior, and integration boundaries.
+Prefer the U.S.E. testing style from *The Art of Unit Testing*: structure each test around `Use case`, `Scenario`, and `Expectation`, and keep those three parts visually obvious in the test body.
+Test naming convention: use `test_<use_case>__<scenario>__<expectation>()` for backend and frontend automated tests. Example: `test_create_retro__when_same_date_is_posted_twice__rejects_the_second_create()`.
+Within each test, prefer a short Arrange/Act/Assert flow under the U.S.E. name. Keep one primary behavior per test and avoid names like `test_happy_path` or `test_works`.
 
 ## Deploy phase guide
 

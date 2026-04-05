@@ -160,3 +160,47 @@ class TreeResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     items: list[TreeMainGoalResponse]
+
+
+class RetroCreateRequest(BaseModel):
+    date: str
+    content: str
+
+
+class RetroUpdateRequest(BaseModel):
+    content: str
+
+
+class RetroResponse(BaseModel):
+    id: str
+    date: str
+    content: str
+    rewarded: bool
+    created_at: str
+    updated_at: str
+
+
+class RetroRewardResponse(BaseModel):
+    granted: bool
+    amount: int
+
+
+class RetroCreateResponse(BaseModel):
+    item: RetroResponse
+    reward: RetroRewardResponse
+    wallet_balance: int
+
+
+class RetroListResponse(BaseModel):
+    items: list[RetroResponse]
+    next_cursor: str | None = None
+    has_more: bool
+
+
+class LifePlaybookRequest(BaseModel):
+    content: str
+
+
+class LifePlaybookResponse(BaseModel):
+    content: str
+    updated_at: str
